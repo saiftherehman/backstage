@@ -56,6 +56,7 @@ Remove it with `./uninstall.sh`. Your records in `sessions/` are kept.
 - [Architecture](docs/architecture.md): how it works, D-Bus interface, layout
 - [Development](docs/development.md): running and testing parts, extending it
 - [Troubleshooting](docs/troubleshooting.md)
+- [To do](TODO.md): planned features
 
 ## Where to change common things
 

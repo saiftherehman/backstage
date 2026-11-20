@@ -1,0 +1,194 @@
+/* Backstage. Colours: near black surface, white text, one amber accent
+   for the line being read and the main button, red for recording. */
+
+.backstage {
+    background-color: #111111;
+    color: #f2f2f2;
+    border-radius: 18px;
+    padding: 4px 6px;
+    min-width: 240px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.backstage:expanded {
+    border-radius: 22px;
+    padding: 8px 10px 10px 10px;
+    width: 620px;
+}
+
+/* Collapsed pill */
+.backstage-pill {
+    spacing: 8px;
+    padding: 3px 8px;
+    height: 24px;
+}
+
+.backstage-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #5c5c5c;
+}
+
+.backstage-dot:active {
+    background-color: #ff453a;
+}
+
+.backstage-pill-label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.backstage-pill-timer {
+    font-size: 13px;
+    font-feature-settings: "tnum";
+    color: #a8a8a8;
+}
+
+/* Tabs */
+.backstage-body {
+    spacing: 10px;
+    padding-top: 6px;
+}
+
+.backstage-tabs {
+    spacing: 4px;
+}
+
+.backstage-tab {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a8a8a8;
+    padding: 4px 12px;
+    border-radius: 12px;
+}
+
+.backstage-tab:hover {
+    color: #f2f2f2;
+    background-color: #222222;
+}
+
+.backstage-tab:checked {
+    color: #111111;
+    background-color: #f2f2f2;
+}
+
+/* Pages */
+.backstage-page {
+    spacing: 10px;
+}
+
+.backstage-controls {
+    spacing: 6px;
+}
+
+.backstage-button {
+    font-size: 12px;
+    color: #f2f2f2;
+    background-color: #262626;
+    padding: 5px 12px;
+    border-radius: 10px;
+}
+
+.backstage-button:hover {
+    background-color: #333333;
+}
+
+.backstage-button:active {
+    background-color: #3d3d3d;
+}
+
+.backstage-button-primary {
+    color: #111111;
+    background-color: #f5b83d;
+    font-weight: 600;
+}
+
+.backstage-button-primary:hover {
+    background-color: #f8c860;
+}
+
+.backstage-hint {
+    font-size: 13px;
+    color: #a8a8a8;
+}
+
+/* Teleprompter */
+.backstage-prompter {
+    spacing: 4px;
+    padding: 4px 2px;
+}
+
+.backstage-line {
+    font-size: 17px;
+}
+
+.backstage-line-current {
+    font-size: 22px;
+    font-weight: 600;
+    color: #f5b83d;
+}
+
+.backstage-line-done {
+    color: #5c5c5c;
+}
+
+.backstage-line-next {
+    color: #d0d0d0;
+}
+
+/* Assistant */
+.backstage-question {
+    font-size: 12px;
+    color: #a8a8a8;
+}
+
+.backstage-answer-scroll {
+    max-height: 260px;
+}
+
+.backstage-answer {
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+/* Session */
+.backstage-session-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.backstage-warning {
+    font-size: 12px;
+    color: #f5b83d;
+}
+
+.backstage-transcript {
+    spacing: 4px;
+}
+
+.backstage-transcript-line {
+    font-size: 13px;
+    color: #d0d0d0;
+}
+
+/* Phone */
+.backstage-phone {
+    spacing: 16px;
+}
+
+.backstage-qr {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 6px;
+}
+
+.backstage-phone-text {
+    spacing: 8px;
+}
+
+.backstage-url {
+    font-size: 12px;
+    font-family: monospace;
+    color: #f5b83d;
+}

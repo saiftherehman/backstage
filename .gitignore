@@ -1,0 +1,21 @@
+# Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Downloaded by install.sh (hundreds of MB)
+models/
+
+# Personal data: meeting records and the last loaded script
+sessions/*
+!sessions/.gitkeep
+scripts/*
+!scripts/.gitkeep
+
+# Compiled by install.sh
+*.compiled
+
+# Editors
+.vscode/
+.idea/
+*.swp

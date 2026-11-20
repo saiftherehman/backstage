@@ -1,0 +1,8 @@
+{
+  "uuid": "backstage@saiftherehman.github.io",
+  "name": "Backstage",
+  "description": "Meeting island at the top of the screen: teleprompter that follows your voice, answers to questions from the meeting and the screen, and a saved record of each session. Needs the Backstage helper from ~/Scripts/Backstage.",
+  "shell-version": ["50"],
+  "settings-schema": "org.gnome.shell.extensions.backstage",
+  "version": 1
+}

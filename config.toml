@@ -1,0 +1,78 @@
+# Backstage settings.
+# The helper reads this file when it starts. After editing, restart it:
+#   systemctl --user restart backstage-helper
+
+[assistant]
+# Which logged-in command line AI analyses the screen: claude, codex or gemini.
+# Only tools that are installed and signed in can be picked from the island.
+provider = "claude"
+# During an assistant session the island takes a screenshot this often (seconds).
+# Only screens that changed are analysed, and one at a time: each analysis
+# takes about 4 to 10 seconds.
+watch_interval = 2
+# Share of the screen (0 to 1) that must change before it is analysed again.
+min_screen_change = 0.02
+# Seconds between analyses started by a question heard in the meeting.
+question_cooldown = 15
+# Answers are meant to be read at a glance, so keep them short.
+max_answer_words = 120
+# Seconds before one analysis is given up on.
+timeout = 90
+# How much of the meeting conversation is sent with each analysis, in seconds.
+context_seconds = 180
+
+[assistant.models]
+# Model passed to each tool. Leave empty to use the tool's own default.
+claude = "sonnet"
+codex = ""
+gemini = ""
+
+[audio]
+# PipeWire node names. Empty means the system default.
+# List them with: wpctl status
+mic = ""
+system = ""
+# Loudness (0 to 1) above which a 100 ms chunk counts as speech.
+speech_level = 0.01
+
+[speech]
+# Whisper model for the transcript: tiny.en, base.en, small.en or medium.en.
+# Bigger is more accurate but slower. small.en suits an 8-core laptop.
+whisper_model = "small.en"
+whisper_threads = 4
+# Vosk model that follows your voice through the script (fast, lower quality).
+vosk_model = "vosk-model-small-en-us-0.15"
+# A pause this long ends a sentence and sends it to Whisper.
+silence_seconds = 0.7
+# Long speech without a pause is cut into pieces of this length.
+max_segment_seconds = 12
+
+[prompter]
+# Characters per script line in the island.
+line_width = 52
+# How far ahead in the script to look for what you just said, in words.
+lookahead_words = 40
+# How closely the spoken words must match the script (0 to 100).
+match_score = 72
+
+[voice]
+# Read answers aloud while the entire screen is shared (the island is hidden then).
+#   auto   = only when the meeting cannot hear your microphone: no microphone,
+#            microphone muted in GNOME, or no app using it
+#   never  = stay silent
+#   always = always read aloud during a full screen share
+speak_answers = "auto"
+# Piper voice in models/piper/. Others: https://huggingface.co/rhasspy/piper-voices
+voice = "en_US-lessac-medium"
+
+[phone]
+# Phone page: a second screen on the same Wi-Fi. Open the island's Phone tab
+# and scan the QR code.
+enabled = true
+port = 8765
+
+[sessions]
+# Where meeting records are saved, relative to this folder.
+folder = "sessions"
+# Write a summary with action items when a session ends.
+summary_on_stop = true

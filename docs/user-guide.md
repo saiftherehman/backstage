@@ -1,0 +1,151 @@
+# User guide
+
+Backstage puts a small black island at the top centre of the screen, just
+under the top bar. Click it (or press `Super+Alt+N`) to open it. It has four
+tabs.
+
+## Teleprompter
+
+For presentations and prepared talks.
+
+1. Load a script, either way:
+   - copy the text anywhere, then press **Paste script**
+   - press **Open document** and pick a file: `.pptx`, `.docx`, `.pdf`, `.txt`
+     or `.md`. For slides, each slide's speaker notes are used when it has
+     them (that is what you say), otherwise the text on the slide.
+2. Press **Start teleprompter**. The current line is shown large in amber,
+   with one line before and three after. As you speak, the highlight moves
+   along with your voice.
+3. If it loses you, press **Back** / **Next** (or `Super+Alt+Up` / `Down`),
+   or **Restart** to go back to the top.
+4. Press **Stop and save** when you are done.
+
+The last loaded script is kept in `scripts/current.txt` and loads again next
+time.
+
+## Assistant
+
+For meetings, calls and anything on screen you want explained or answered.
+
+1. Press **Start assistant**, or `Super+A` from anywhere.
+2. Backstage takes a screenshot every 2 seconds. When the screen has changed
+   and stopped moving, it sends that screenshot, with the last few minutes of
+   the meeting conversation, to your AI tool. The answer appears in the
+   Assistant tab (and on the phone) in about 3 to 10 seconds:
+
+   ```
+   About: Team quiz with two questions and a sales table
+   1. 17 x 23 = 391
+   2. Jupiter, about 9 hours 56 minutes
+   - South grew 39%, North fell 21%, total flat at 4.40M
+   ```
+
+   It answers every question it sees, explains data with the real numbers,
+   and never asks you anything back.
+3. If someone asks a question out loud, the next screenshot is analysed
+   straight away and the spoken question is answered too.
+4. `Super+A` or **Analyse now** while a session runs analyses the screen
+   immediately, even if nothing changed.
+5. The last answer stays readable while the next one loads ("Updating...").
+6. Press **Stop and save** when you are done.
+
+The **AI** button switches between the AI tools that are installed and signed
+in on this computer.
+
+Only one session runs at a time: a teleprompter session or an assistant
+session.
+
+## Session
+
+Shows what is running (Teleprompter session or Assistant session), where its
+output is going right now, the last few lines of the live transcript, and a
+**Stop and save** button. **Open records** opens the session's folder.
+
+When a session stops, a summary with decisions and action items is written to
+its folder a few seconds later.
+
+## Phone
+
+A second screen for the assistant.
+
+1. Open the **Phone** tab and scan the QR code with your phone's camera, or
+   type the link shown into the phone's browser. The phone must be on the same
+   Wi-Fi as the laptop.
+2. The page shows the latest analysis, the teleprompter and the transcript,
+   updates live, and buzzes when a new answer arrives.
+3. **Analyse now** on the phone does the same as `Super+A`.
+
+The link contains a private key. Anyone with the link can read your session,
+so do not share it. See [privacy and security](privacy-and-security.md) for how
+to make a new key.
+
+## Screen sharing
+
+What happens depends on what you share in Meet, Zoom, Teams or any other app.
+
+| You share | Island | Assistant output goes to |
+| --- | --- | --- |
+| Nothing | Visible | Island and phone |
+| One window or browser tab | Visible (a window share never includes it) | Island and phone |
+| Entire screen, microphone on | Hidden | Phone only |
+| Entire screen, microphone off | Hidden | Phone, and read aloud on your speakers |
+
+Why the island hides: GNOME shares the entire screen as one finished image, and
+nothing can be left out of it. So during a full screen share the island steps
+aside and the phone takes over.
+
+"Microphone off" means the meeting cannot hear you: there is no microphone,
+it is muted in GNOME (keyboard microphone key or the sound menu), or no app is
+using it. Muting with the button inside the meeting app usually keeps the
+microphone open, so Backstage treats it as on and stays quiet. This errs on
+the safe side: it never talks while the meeting might be listening.
+
+While an answer is read aloud, recording pauses so the voice does not end up
+in the transcript. If you tick "share system audio" in the meeting app, the
+others hear the voice too.
+
+## Keys
+
+| Keys | Action |
+| --- | --- |
+| `Super+A` | Start an assistant session, or analyse now if one is running |
+| `Super+Alt+N` | Open or close the island |
+| `Super+Alt+Up` / `Down` | Teleprompter one line back / forward |
+| `Super+Alt+P` | Open the preview window |
+
+Super is the Windows key. GNOME normally uses `Super+A` for the app grid;
+install.sh turns that off so Backstage can use it (press Super on its own and
+click the grid button to reach the app grid instead).
+
+## Preview window
+
+`Super+Alt+P` (or `tools/preview.sh`) opens a separate GNOME desktop in a
+window, with the island running. Use it to try Backstage or test changes
+without logging out. Click inside the window before using the keys.
+
+It has its own home folder (`~/.cache/backstage-preview`), settings and
+session bus, so your real desktop is not touched. While it is open the real
+helper is paused; it starts again when you close the window. Sessions you
+record in it are saved to the normal `sessions/` folder.
+
+## Records
+
+Each session is a folder in `sessions/`, readable only by you:
+
+```
+sessions/2026-11-21_1430_assistant_weekly-sync/
+    session.json      kind, title, start and end time, AI tool
+    transcript.md     everything said, with times
+    answers.md        assistant sessions: every analysis, with its screenshot
+    script.txt        teleprompter sessions: the script used
+    summary.md        summary, decisions and action items
+    events.jsonl      all of the above as JSON lines, for scripts
+    screenshots/      the screenshots that were analysed (JPEG)
+```
+
+The session is named after the window that had focus when it started, which
+is usually the meeting.
+
+In the transcript, "Me" is your microphone and "Them" is whatever the computer
+plays (the other people). Use headphones if you can: through speakers your
+microphone also hears the others, and their words appear twice.

@@ -1,0 +1,16 @@
+[Unit]
+# Template: install.sh replaces @PROJECT@ with the project folder.
+Description=Backstage meeting helper (speech, teleprompter, answers)
+PartOf=graphical-session.target
+After=graphical-session.target pipewire.service
+
+[Service]
+WorkingDirectory=@PROJECT@/helper
+ExecStart=@PROJECT@/.venv/bin/python -m backstage
+Restart=on-failure
+RestartSec=5
+# Whisper models are already in models/; never reach out to download again.
+Environment=HF_HUB_OFFLINE=1
+
+[Install]
+WantedBy=graphical-session.target

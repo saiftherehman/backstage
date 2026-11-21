@@ -1,12 +1,19 @@
 /* Backstage. Colours: near black surface, white text, one amber accent
-   for the line being read and the main button, red for recording. */
+   for the line being read and the main button, red for recording.
+
+   The island is see-through until the pointer is on it (:solid). How much
+   the whole island fades is IDLE_OPACITY at the top of island.js. */
 
 .backstage {
-    background-color: #111111;
+    background-color: rgba(17, 17, 17, 0.45);
     color: #f2f2f2;
     border-radius: 18px;
     padding: 4px 6px;
     min-width: 240px;
+}
+
+.backstage:solid {
+    background-color: #111111;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 

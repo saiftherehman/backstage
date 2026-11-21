@@ -23,7 +23,8 @@ export default class BackstageIslandExtension extends Extension {
         this._state = null;
         this._watchId = 0;
         this._capturing = false;
-        this._island = new Island({
+        this._settings = this.getSettings();
+        this._island = new Island(this._settings, {
             pasteScript: () => this._pasteScript(),
             openDocument: () => this._openDocument(),
             jump: line => this._call(this._client.jumpPrompter(line)),
@@ -51,7 +52,6 @@ export default class BackstageIslandExtension extends Extension {
             onError: message => this._showError(message),
         });
 
-        this._settings = this.getSettings();
         const bindings = {
             'toggle-island': () => this._island.setExpanded(!this._island.expanded),
             'ask-now': () => this._assistantKey(),

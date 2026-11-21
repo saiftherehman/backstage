@@ -167,12 +167,12 @@ helper/backstage/           the helper (run as: python -m backstage)
 extension/backstage@saiftherehman.github.io/
     extension.js            wiring: helper, hotkeys, screenshot loop, file picker
     helperClient.js         D-Bus client
-    island.js               pill, tabs, position
+    island.js               pill, tabs, position, dragging, see-through fade
     pages/                  teleprompter, assistant, session and phone tabs
     widgets.js              shared buttons and labels
     screenshot.js           screenshots inside GNOME Shell
     stylesheet.css          look of the island
-    schemas/                hotkey settings
+    schemas/                hotkey settings, saved island position
 systemd/backstage-helper.service   service template
 docs/                       this documentation
 models/                     speech and voice models (not in git)

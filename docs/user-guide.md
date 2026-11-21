@@ -1,8 +1,20 @@
 # User guide
 
-Backstage puts a small black island at the top centre of the screen, just
-under the top bar. Click it (or press `Super+Alt+N`) to open it. It has four
-tabs.
+Backstage puts a small island at the top centre of the screen, just under the
+top bar. Click it (or press `Super+Alt+N`) to open it. It has four tabs.
+
+The island is see-through while the pointer is away, so you can read what is
+behind it, and turns solid black when you move the pointer onto it. To move
+it, drag it by its top strip (the part with the name and timer) to any spot
+on the screen. It stays there, open or closed, and after a restart. To put it
+back at the top centre:
+
+```bash
+gsettings --schemadir ~/.local/share/gnome-shell/extensions/backstage@saiftherehman.github.io/schemas \
+  reset org.gnome.shell.extensions.backstage island-position
+```
+
+Then turn the extension off and on, or log out and back in.
 
 ## Teleprompter
 

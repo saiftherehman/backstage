@@ -68,6 +68,7 @@ Remove it with `./uninstall.sh`. Your records in `sessions/` are kept.
 | Answer wording | top of `helper/backstage/assistant.py` |
 | Hotkeys | `extension/backstage@saiftherehman.github.io/schemas/` |
 | Look of the island | `extension/backstage@saiftherehman.github.io/stylesheet.css` |
+| How see-through the island is | `IDLE_OPACITY` in `island.js` and `.backstage` in `stylesheet.css` |
 
 After editing `config.toml`: `systemctl --user restart backstage-helper`.
 

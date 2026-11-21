@@ -96,5 +96,8 @@ be changed in Settings > Keyboard > Keyboard Shortcuts > Custom Shortcuts.
 ## Look
 
 Colours and sizes of the island are in
-`extension/backstage@saiftherehman.github.io/stylesheet.css`. The phone page has
+`extension/backstage@saiftherehman.github.io/stylesheet.css`. How see-through
+it is while the pointer is away is set in two places: the background of
+`.backstage` in the stylesheet, and `IDLE_OPACITY` at the top of `island.js`
+(0 to 255, for the text and everything else). The phone page has
 its own styles at the top of `helper/backstage/phone_page.html`.

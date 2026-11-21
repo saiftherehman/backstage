@@ -61,3 +61,20 @@ The open risks from the security review in
 - **Consent.** Show a clear recording mark in the island while a session
   records, and add an optional spoken or chat notice that the meeting is
   being transcribed.
+
+## Island position and see-through: loose ends
+
+The island can now be dragged anywhere and is see-through until the pointer
+is on it. Left to do:
+
+- **Reset without a terminal.** Putting it back at the top centre needs a
+  `gsettings` command and an extension restart. Add a "Back to top centre"
+  item (in the settings window above, or on a right-click of the pill), and
+  have the island listen for changes to `island-position` so it moves at once.
+- **One setting for see-through.** The amount is set in two places today
+  (`IDLE_OPACITY` in `island.js` and the `.backstage` background in
+  `stylesheet.css`). Make it one slider in the settings window, with an
+  option to keep the island always solid.
+- **Several screens.** The position is kept inside the whole desktop area, so
+  with two screens of different sizes the island can end up in the empty
+  corner between them. Keep it inside the screen it was dropped on.

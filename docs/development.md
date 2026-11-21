@@ -8,11 +8,14 @@ the phone port:
 ```bash
 systemctl --user stop backstage-helper
 cd helper
-../.venv/bin/python -m backstage          # Ctrl+C to stop
+BACKSTAGE_ANY_CALLER=1 ../.venv/bin/python -m backstage   # Ctrl+C to stop
 systemctl --user start backstage-helper   # when done
 ```
 
-Drive it from another terminal:
+`BACKSTAGE_ANY_CALLER=1` lets a terminal call the helper and see its
+signals. Without it only GNOME Shell may (see
+[privacy and security](privacy-and-security.md)). Drive it from another
+terminal:
 
 ```bash
 B="gdbus call --session -d io.github.saiftherehman.Backstage -o /io/github/saiftherehman/Backstage -m io.github.saiftherehman.Backstage"
@@ -22,6 +25,24 @@ $B.AnalyseNow
 gdbus monitor --session -d io.github.saiftherehman.Backstage   # see the Answer signal
 $B.StopSession
 ```
+
+## Checking the security features
+
+After a change to the phone page, D-Bus access, privacy or records, go
+through these by hand (log out and back in first if the extension changed):
+
+1. Pill shows a red **REC** while a session runs, and the phone page does too.
+2. Assistant tab: **Pause** and `Super+Alt+H` stop analyses and the status
+   says so; **Resume** starts them again.
+3. Focus a window listed in `[privacy] private_windows`: the status says the
+   screen is not sent, and no new answer arrives.
+4. Phone tab shows an `https://` link and a fingerprint; the phone's warning
+   shows the same fingerprint; `/ca.crt` downloads.
+5. From a terminal, `gdbus call` to the helper is refused with "Only GNOME
+   Shell may use the Backstage helper", while the island keeps working.
+6. With `chat_notice` set, starting a session copies it to the clipboard.
+7. With `encrypt = true`, a stopped session turns into a `.backstage` file
+   after its summary, and `tools/records.sh open` shows the files.
 
 ## Trying extension changes
 
@@ -87,6 +108,7 @@ extension to `SUPPORTED`, plus the file pattern to `DOCUMENT_TYPES` in
 The XML is in two places: `helper/backstage/service.py` and
 `extension/.../helperClient.js`. Change both, plus the `_on_call` dispatch and
 `SIGNAL_TYPES` in `service.py`, and the method wrappers in `helperClient.js`.
+Then update the tables in [architecture](architecture.md).
 
 ## Style
 

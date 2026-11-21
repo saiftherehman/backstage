@@ -16,6 +16,7 @@ class AssistantPage extends St.BoxLayout {
         this._providers = [];
         this._provider = '';
         this._running = false;
+        this._paused = false;
 
         this._status = wrapLabel('', 'backstage-question');
         this.add_child(this._status);
@@ -31,6 +32,8 @@ class AssistantPage extends St.BoxLayout {
         controls.add_child(this._startStop);
         this._analyseButton = button('Analyse now', () => actions.analyseNow());
         controls.add_child(this._analyseButton);
+        this._pauseButton = button('', () => actions.setPaused(!this._paused));
+        controls.add_child(this._pauseButton);
         controls.add_child(new St.Widget({x_expand: true}));
         this._providerButton = button('', () => this._nextProvider());
         controls.add_child(this._providerButton);
@@ -46,11 +49,19 @@ class AssistantPage extends St.BoxLayout {
         this._startStop.label = this._running ? 'Stop and save' : 'Start assistant';
         this._startStop.reactive = this._running || !state.active;
         this._startStop.opacity = this._startStop.reactive ? 255 : 110;
-        this._analyseButton.visible = this._running;
+        const wasPaused = this._paused;
+        this._paused = state.paused;
+        this._analyseButton.visible = this._running && !this._paused;
+        this._pauseButton.visible = this._running;
+        this._pauseButton.label = this._paused ? 'Resume' : 'Pause';
         if (this._running && !wasRunning) {
             this._status.text = 'Watching the screen...';
             this._answer.text = '';
         }
+        if (this._running && this._paused)
+            this._status.text = 'Paused: nothing is sent to the AI. Press Resume (or Super+Alt+H).';
+        else if (this._running && wasPaused)
+            this._status.text = 'Watching the screen...';
         this._providers = state.providers;
         this._provider = state.provider;
         const current = this._providers.find(p => p.name === this._provider);
@@ -76,5 +87,13 @@ class AssistantPage extends St.BoxLayout {
 
     showError(message) {
         this._status.text = message;
+    }
+
+    /** name: the private window in front, or '' once it is gone. */
+    showPrivate(name) {
+        if (name)
+            this._status.text = `Not sending the screen: ${name} is in front.`;
+        else if (this._running && !this._paused)
+            this._status.text = 'Watching the screen...';
     }
 });

@@ -10,6 +10,9 @@ Where assistant output shows up depends on how the screen is shared:
 - no share, or one window or tab: the island and the phone page
 - the entire screen: the island hides, so only the phone page, and it is
   read aloud when the meeting cannot hear the microphone
+
+While the assistant is paused nothing is sent to the AI. The island also
+skips screenshots while a private window (config [privacy]) is in front.
 """
 
 import json
@@ -17,8 +20,8 @@ import threading
 import time
 from pathlib import Path
 
-from . import providers
-from .assistant import Assistant
+from . import providers, vault
+from .assistant import STEERED_WARNING, Assistant, looks_steered
 from .audio import Recorder, microphone_available, microphone_live
 from .config import SCRIPTS_DIR
 from .documents import read_text
@@ -58,7 +61,7 @@ class BackstageApp:
         self._speaking = False
         self._last_spoken = ""
         self._heard_question = ""
-        self._island_area = None   # where the island was on the latest frame
+        self.paused = False
         STATE_DIR.mkdir(parents=True, exist_ok=True)
 
         speech, prompter, assistant = config["speech"], config["prompter"], config["assistant"]
@@ -76,6 +79,8 @@ class BackstageApp:
         self.phone = None
         if config["phone"]["enabled"]:
             self.phone = PhoneServer(config["phone"]["port"], lambda: self.analyse_now("asked from the phone"))
+        if config["sessions"]["encrypt"]:
+            threading.Thread(target=self._seal_leftovers, daemon=True).start()
 
     def emit(self, signal, *args):
         self._bus_emit(signal, *args)
@@ -105,8 +110,13 @@ class BackstageApp:
             "prompter_line": self.prompter.line,
             "share_mode": self.share.mode,
             "mic_ok": microphone_available(self.config["audio"]["mic"]),
+            "paused": self.paused,
+            "private_windows": self.config["privacy"]["private_windows"],
+            "chat_notice": self.config["consent"]["chat_notice"],
             "phone_url": self.phone.url if self.phone else "",
             "phone_qr": str(self.phone.qr_file) if self.phone else "",
+            "phone_ca_url": self.phone.ca_url if self.phone else "",
+            "phone_fingerprint": self.phone.fingerprint if self.phone else "",
             "status": self.status,
         })
 
@@ -131,6 +141,7 @@ class BackstageApp:
             self.session.save_script(self.script)
             self.prompter.position = 0
         self.watcher.reset()
+        self.paused = False
         self._last_spoken = ""
         self._start_recording()
         self._set_status("Watching the screen" if kind == "assistant" else "Following your voice")
@@ -146,17 +157,31 @@ class BackstageApp:
         self.session = None
         session.close(self.assistant.provider_name)
         self._set_status("Saved to " + session.folder.name)
-        if self.config["sessions"]["summary_on_stop"]:
-            threading.Thread(target=self._summarise, args=(session,), daemon=True).start()
+        threading.Thread(target=self._finish, args=(session,), daemon=True).start()
 
-    def _summarise(self, session):
+    def _finish(self, session):
+        """After a session: write the summary, then encrypt the folder."""
+        if self.config["sessions"]["summary_on_stop"]:
+            try:
+                summary = self.assistant.summarise(session)
+                if summary:
+                    session.save_summary(summary)
+            except Exception as error:
+                self.emit("Error", f"Summary failed: {error}")
+        if self.config["sessions"]["encrypt"]:
+            try:
+                vault.seal(session.folder)
+            except Exception as error:
+                self.emit("Error", f"Could not encrypt {session.folder.name}: {error}")
+
+    def _seal_leftovers(self):
+        """Encrypts session folders left plain: from before encryption was
+        turned on, or from a session that ended in a crash."""
         try:
-            summary = self.assistant.summarise(session)
+            for file in vault.seal_all(self.config["sessions"]["folder"]):
+                print(f"Encrypted {file.name}", flush=True)
         except Exception as error:
-            self.emit("Error", f"Summary failed: {error}")
-            return
-        if summary:
-            session.save_summary(summary)
+            print(f"Could not encrypt the records: {error}", flush=True)
 
     def _start_recording(self):
         audio, speech = self.config["audio"], self.config["speech"]
@@ -209,19 +234,20 @@ class BackstageApp:
 
     # Assistant: screen analysis
 
-    def offer_frame(self, path, x, y, width, height):
-        """A new screenshot from the island. (x, y, width, height) is the
-        island's own area, blacked out before analysis."""
-        self._island_area = (x, y, width, height)
-        if self.session and self.session.kind == "assistant":
-            self.watcher.offer(path, self._island_area, reason="screen changed")
+    def offer_frame(self, path):
+        """A new screenshot from the island, taken without the island in it."""
+        if self.session and self.session.kind == "assistant" and not self.paused:
+            self.watcher.offer(path, reason="screen changed")
 
     def analyse_now(self, reason="asked with the hotkey"):
         if not (self.session and self.session.kind == "assistant"):
             self.emit("Error", "Start an assistant session first")
             return
+        if self.paused:
+            self.emit("Error", "Paused: nothing is sent to the AI. Press Resume (or Super+Alt+H).")
+            return
         if LIVE_FRAME.exists():
-            self.watcher.offer(str(LIVE_FRAME), self._island_area, force=True, reason=reason)
+            self.watcher.offer(str(LIVE_FRAME), force=True, reason=reason)
 
     def _analyse(self, frame, reason):
         session = self.session
@@ -238,9 +264,13 @@ class BackstageApp:
             return
         if self.session is not session:
             return   # stopped while the AI was working
-        session.add_analysis(answer, shot, reason)
+        steered = looks_steered(answer)
+        if steered:
+            answer = f"{STEERED_WARNING}\n{answer}"
+        session.add_analysis(answer, shot, reason, steered)
         self.emit("Answer", reason, answer)
-        self._maybe_speak(answer)
+        if not steered:   # never read a possibly steered answer into the meeting
+            self._maybe_speak(answer)
 
     def _maybe_speak(self, answer):
         """Read aloud during a full screen share when the meeting cannot hear
@@ -260,6 +290,13 @@ class BackstageApp:
         self._speaking = speaking
 
     # Settings changed from the island
+
+    def set_paused(self, paused):
+        self.paused = paused
+        if self.session and self.session.kind == "assistant":
+            self._set_status("Paused: nothing is sent to the AI" if paused else "Watching the screen")
+        else:
+            self._changed()
 
     def set_provider(self, name):
         self.assistant.set_provider(name)

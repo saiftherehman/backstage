@@ -59,7 +59,14 @@ For meetings, calls and anything on screen you want explained or answered.
 4. `Super+A` or **Analyse now** while a session runs analyses the screen
    immediately, even if nothing changed.
 5. The last answer stays readable while the next one loads ("Updating...").
-6. Press **Stop and save** when you are done.
+6. **Pause** (or `Super+Alt+H`) stops sending the screen to the AI, for
+   example while you type a password; **Resume** starts again. The meeting
+   is still transcribed. Screens of password managers and banking are never
+   sent anyway (`[privacy]` in `config.toml`).
+7. Press **Stop and save** when you are done.
+
+If an answer starts with "Check this answer", text on the screen may have
+tried to steer the AI. Read it with care; it is not read aloud.
 
 The **AI** button switches between the AI tools that are installed and signed
 in on this computer.
@@ -68,6 +75,10 @@ Only one session runs at a time: a teleprompter session or an assistant
 session.
 
 ## Session
+
+While a session records, the island shows a red dot and **REC**. If you set
+`chat_notice` in `config.toml`, that message is copied when a session starts,
+so you can paste it into the meeting chat to let people know.
 
 Shows what is running (Teleprompter session or Assistant session), where its
 output is going right now, the last few lines of the live transcript, and a
@@ -82,7 +93,10 @@ A second screen for the assistant.
 
 1. Open the **Phone** tab and scan the QR code with your phone's camera, or
    type the link shown into the phone's browser. The phone must be on the same
-   Wi-Fi as the laptop.
+   Wi-Fi as the laptop. The first time, the phone warns that the connection is
+   not private: check the fingerprint against the Phone tab and continue, or
+   install the laptop's certificate once so it never warns again (steps in
+   [privacy and security](privacy-and-security.md#phone-page)).
 2. The page shows the latest analysis, the teleprompter and the transcript,
    updates live, and buzzes when a new answer arrives.
 3. **Analyse now** on the phone does the same as `Super+A`.
@@ -123,6 +137,7 @@ others hear the voice too.
 | `Super+A` | Start an assistant session, or analyse now if one is running |
 | `Super+Alt+N` | Open or close the island |
 | `Super+Alt+Up` / `Down` | Teleprompter one line back / forward |
+| `Super+Alt+H` | Pause or resume sending the screen to the AI |
 | `Super+Alt+P` | Open the preview window |
 
 Super is the Windows key. GNOME normally uses `Super+A` for the app grid;
@@ -157,6 +172,11 @@ sessions/2026-11-21_1430_assistant_weekly-sync/
 
 The session is named after the window that had focus when it started, which
 is usually the meeting.
+
+With `encrypt = true` under `[sessions]`, each folder becomes one encrypted
+`.backstage` file when the session ends. Open one with
+`tools/records.sh open sessions/<name>.backstage`; see
+[encrypted records](privacy-and-security.md#encrypted-records).
 
 In the transcript, "Me" is your microphone and "Them" is whatever the computer
 plays (the other people). Use headphones if you can: through speakers your

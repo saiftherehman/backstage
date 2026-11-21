@@ -30,6 +30,7 @@
   .dot.on { background: var(--rec); }
   #status { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #timer { color: var(--muted); font-variant-numeric: tabular-nums; }
+  #rec { color: var(--rec); font-size: 12px; font-weight: 700; letter-spacing: .06em; }
   #link { font-size: 12px; color: var(--muted); }
   #link.off { color: var(--rec); }
   section { padding: 16px 0; border-bottom: 1px solid var(--line); }
@@ -53,6 +54,7 @@
   <header>
     <span class="dot" id="dot"></span>
     <span id="status">Connecting...</span>
+    <span id="rec" hidden>REC</span>
     <span id="timer"></span>
   </header>
   <div id="link">Not connected yet</div>
@@ -82,6 +84,7 @@
 
   function renderState() {
     $("dot").classList.toggle("on", !!state.active);
+    $("rec").hidden = !state.active;
     $("status").textContent = state.active ? state.title : (state.status || "No session running");
     renderPrompter();
   }

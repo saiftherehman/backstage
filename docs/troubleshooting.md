@@ -59,6 +59,52 @@ follow you.
   ("client isolation"). Try a home network or a phone hotspot with the laptop
   connected to it.
 - If the laptop's address changed, reopen the Phone tab: the QR code updates.
+- An old bookmark starting with `http://` no longer works. The page is HTTPS
+  now; scan the QR code again.
+
+## The phone says the connection is not private
+
+Expected on the first visit, and again whenever the laptop's address changes,
+until the laptop's certificate is installed on the phone. Check that the
+fingerprint in the warning's certificate details matches the one on the
+island's Phone tab, then continue. To stop the warning for good, install the
+certificate; steps in [privacy and security](privacy-and-security.md#phone-page).
+
+If the certificate was installed and the warning is back, the certificates
+were made again (for example after deleting `~/.local/state/backstage/tls/`).
+Remove the old one from the phone and install the new one.
+
+## The assistant says "Paused" or "Not sending the screen"
+
+- "Paused": press **Resume** on the Assistant tab or `Super+Alt+H`.
+- "Not sending the screen: <app> is in front": that window matches an entry
+  in `[privacy] private_windows`. Switch to another window, or remove the
+  entry from `config.toml` if it matches more than you meant (for example
+  `"bank"` also matches any window title with "bank" in it).
+
+## An answer starts with "Check this answer"
+
+Text on the screen may have tried to steer the AI, or the screen is about
+prompts or instructions. Read the answer with care. To change what counts,
+edit `STEERED_PATTERNS` at the top of `helper/backstage/assistant.py`.
+
+## "Only GNOME Shell may use the Backstage helper"
+
+The helper refuses calls from any program but GNOME Shell. For testing with
+`gdbus` from a terminal, run the helper by hand with `BACKSTAGE_ANY_CALLER=1`
+(see [development](development.md)). If GNOME Shell itself is refused, check
+where it lives with `readlink /proc/$(pgrep -x gnome-shell)/exe` and add that
+path to `ALLOWED_PROGRAMS` in `helper/backstage/service.py`.
+
+## Encrypted records
+
+- "Could not encrypt": the keyring may be locked or missing. Open Passwords
+  and Keys and unlock the Login keyring, then restart the helper; folders left
+  plain are encrypted when it starts.
+- `tools/records.sh open` says there is no key: the "Backstage records key"
+  entry is gone from the keyring. Without it the records cannot be opened;
+  restore the key from your copy into the keyring (attribute `purpose` =
+  `records`).
 
 ## Answers are not read aloud
 

@@ -17,7 +17,7 @@ model or voice has to be downloaded.
 | `watch_interval` | `2` | Seconds between screenshots during an assistant session |
 | `min_screen_change` | `0.02` | Share of the screen (0 to 1) that must change before it is analysed again. Higher means fewer analyses and lower AI use |
 | `question_cooldown` | `15` | Seconds between analyses started by questions heard out loud |
-| `max_answer_words` | `120` | Upper limit on answer length |
+| `max_answer_words` | `60` | Upper limit on answer length |
 | `timeout` | `90` | Seconds before one analysis is given up on |
 | `context_seconds` | `180` | How much of the meeting conversation is sent with each analysis |
 
@@ -68,8 +68,20 @@ Model passed to each tool. Empty means the tool's own default.
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `enabled` | `true` | Run the phone page. Set to `false` on networks you do not trust |
+| `enabled` | `true` | Run the phone page (HTTPS, see [privacy and security](privacy-and-security.md#phone-page)) |
 | `port` | `8765` | Port of the phone page. If you change it, open the new port in the firewall |
+
+## [privacy]
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `private_windows` | password managers, `"bank"`, `"paypal"` | No screenshot is taken while the window in front matches one of these. Each is matched against the app name and the window title, ignoring case |
+
+## [consent]
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `chat_notice` | `""` (off) | Copied to the clipboard when a session starts, to paste into the meeting chat |
 
 ## [sessions]
 
@@ -77,6 +89,7 @@ Model passed to each tool. Empty means the tool's own default.
 | --- | --- | --- |
 | `folder` | `"sessions"` | Where records are saved, relative to the project folder (or an absolute path) |
 | `summary_on_stop` | `true` | Write `summary.md` when a session ends. Costs one AI call per session |
+| `encrypt` | `false` | Encrypt each session into one `.backstage` file when it ends, with a key in the GNOME keyring. Open with `tools/records.sh open`. See [encrypted records](privacy-and-security.md#encrypted-records) |
 
 ## Keys
 

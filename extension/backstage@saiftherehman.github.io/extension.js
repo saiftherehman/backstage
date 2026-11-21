@@ -23,6 +23,7 @@ export default class BackstageIslandExtension extends Extension {
         this._state = null;
         this._watchId = 0;
         this._capturing = false;
+        this._privateWindow = '';
         this._settings = this.getSettings();
         this._island = new Island(this._settings, {
             pasteScript: () => this._pasteScript(),
@@ -32,6 +33,7 @@ export default class BackstageIslandExtension extends Extension {
             stopSession: () => this._call(this._client.stopSession()),
             analyseNow: () => this._call(this._client.analyseNow()),
             setProvider: name => this._call(this._client.setProvider(name)),
+            setPaused: paused => this._call(this._client.setPaused(paused)),
             openRecords: () => this._openRecords(),
         });
         Main.layoutManager.addTopChrome(this._island);
@@ -57,6 +59,7 @@ export default class BackstageIslandExtension extends Extension {
             'ask-now': () => this._assistantKey(),
             'prompter-back': () => this._call(this._client.jumpPrompter(this._island.prompter.current - 1)),
             'prompter-next': () => this._call(this._client.jumpPrompter(this._island.prompter.current + 1)),
+            'pause-assistant': () => this._call(this._client.setPaused(!this._state?.paused)),
         };
         for (const [name, handler] of Object.entries(bindings)) {
             Main.wm.addKeybinding(name, this._settings, Meta.KeyBindingFlags.NONE,
@@ -89,6 +92,8 @@ export default class BackstageIslandExtension extends Extension {
             island.prompter.setScript(state.script_lines, state.prompter_line);
         island.setSessionStart(state.active ? state.started : 0);
         island.setMessage(state.status || 'Backstage');
+        if (state.active && !previous?.active)
+            this._copyChatNotice(state.chat_notice);
         this._applyShareMode(state.share_mode);
         if (state.active && state.kind === 'assistant')
             this._startWatching(state.watch_interval);
@@ -122,21 +127,46 @@ export default class BackstageIslandExtension extends Extension {
     }
 
     async _sendFrame() {
-        if (this._capturing || !this._state)
+        if (this._capturing || !this._state || this._state.paused)
+            return;
+        const privateWindow = this._privateWindowInFront();
+        if (privateWindow !== this._privateWindow) {
+            this._privateWindow = privateWindow;
+            this._island.assistant.showPrivate(privateWindow);
+        }
+        if (privateWindow)
             return;
         this._capturing = true;
         try {
-            await captureScreen(this._state.live_frame);
-            const island = this._island;
-            const area = island.visible
-                ? [island.x, island.y, island.width, island.height].map(Math.round)
-                : [0, 0, 0, 0];
-            await this._client.offerFrame(this._state.live_frame, area);
+            await captureScreen(this._state.live_frame, this._island);
+            await this._client.offerFrame(this._state.live_frame);
         } catch (e) {
             console.warn(`Backstage: screenshot failed: ${e.message}`);
         } finally {
             this._capturing = false;
         }
+    }
+
+    // The focused window's app name or title if it matches an entry in
+    // [privacy] private_windows, else ''. Such screens are never captured.
+    _privateWindowInFront() {
+        const window = global.display.focus_window;
+        if (!window)
+            return '';
+        const app = Shell.WindowTracker.get_default().get_window_app(window);
+        const names = [app?.get_name(), app?.get_id(), window.get_wm_class(), window.get_title()]
+            .filter(Boolean).map(n => n.toLowerCase());
+        const match = (this._state.private_windows ?? [])
+            .some(entry => names.some(n => n.includes(entry.toLowerCase())));
+        return match ? (app?.get_name() ?? window.get_wm_class() ?? 'a private window') : '';
+    }
+
+    // A note for the meeting chat that the meeting is being transcribed.
+    _copyChatNotice(notice) {
+        if (!notice)
+            return;
+        St.Clipboard.get_default().set_text(St.ClipboardType.CLIPBOARD, notice);
+        Main.notify('Backstage', 'Recording notice copied. Paste it into the meeting chat.');
     }
 
     // Super+A: start an assistant session, or analyse right now if one runs.

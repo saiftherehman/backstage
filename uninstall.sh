@@ -27,9 +27,11 @@ gsettings reset-recursively "$KEYS.custom-keybinding:$ENTRY" 2>/dev/null
 echo "Super+A back to GNOME's app grid"
 gsettings reset org.gnome.shell.keybindings toggle-application-view
 
-echo "Phone key, live screenshot and preview home"
+echo "Phone key, certificates, live screenshot and preview home"
 rm -rf "$HOME/.local/state/backstage" "$HOME/.cache/backstage-preview"
 
 echo
 echo "Done. Log out and back in to clear the island from the running desktop."
 echo "If you opened the phone port in ufw, remove that rule with: sudo ufw status numbered"
+echo "The \"Backstage records key\" stays in the keyring so encrypted records can"
+echo "still be opened; delete it in Passwords and Keys once you no longer need them."

@@ -16,18 +16,13 @@ const INTERFACE = `
       <arg type="s" direction="out" name="id"/>
     </method>
     <method name="StopSession"/>
-    <method name="OfferFrame">
-      <arg type="s" direction="in" name="path"/>
-      <arg type="i" direction="in" name="x"/>
-      <arg type="i" direction="in" name="y"/>
-      <arg type="i" direction="in" name="width"/>
-      <arg type="i" direction="in" name="height"/>
-    </method>
+    <method name="OfferFrame"><arg type="s" direction="in" name="path"/></method>
     <method name="AnalyseNow"/>
     <method name="SetProvider"><arg type="s" direction="in" name="name"/></method>
     <method name="LoadScript"><arg type="s" direction="in" name="text"/></method>
     <method name="LoadDocument"><arg type="s" direction="in" name="path"/></method>
     <method name="JumpPrompter"><arg type="i" direction="in" name="line"/></method>
+    <method name="SetPaused"><arg type="b" direction="in" name="paused"/></method>
     <signal name="StateChanged"><arg type="s" name="state"/></signal>
     <signal name="Transcript"><arg type="s" name="speaker"/><arg type="s" name="text"/></signal>
     <signal name="PrompterMoved"><arg type="i" name="line"/></signal>
@@ -87,8 +82,8 @@ export class HelperClient {
         return this._proxy.StopSessionAsync();
     }
 
-    offerFrame(path, [x, y, width, height]) {
-        return this._proxy.OfferFrameAsync(path, x, y, width, height);
+    offerFrame(path) {
+        return this._proxy.OfferFrameAsync(path);
     }
 
     analyseNow() {
@@ -109,6 +104,10 @@ export class HelperClient {
 
     jumpPrompter(line) {
         return this._proxy.JumpPrompterAsync(line);
+    }
+
+    setPaused(paused) {
+        return this._proxy.SetPausedAsync(paused);
     }
 
     destroy() {

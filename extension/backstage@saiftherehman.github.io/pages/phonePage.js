@@ -29,12 +29,23 @@ class PhonePage extends St.BoxLayout {
             'backstage-hint'));
         this._url = wrapLabel('', 'backstage-url');
         text.add_child(this._url);
+        this._certificate = wrapLabel('', 'backstage-hint');
+        text.add_child(this._certificate);
+        this._fingerprint = wrapLabel('', 'backstage-fingerprint');
+        text.add_child(this._fingerprint);
         this.add_child(text);
         this._qrPath = '';
     }
 
     setState(state) {
         this._url.text = state.phone_url || 'The phone page is turned off in config.toml.';
+        this._certificate.visible = this._fingerprint.visible = Boolean(state.phone_url);
+        this._certificate.text =
+            'The first time, the phone warns that the connection is not private. Check that the ' +
+            "certificate's SHA-256 fingerprint matches the one below, then continue. To stop the " +
+            `warning for good, install the certificate from ${state.phone_ca_url} on the phone ` +
+            '(see docs/privacy-and-security.md).';
+        this._fingerprint.text = state.phone_fingerprint;
         this._qr.visible = Boolean(state.phone_qr);
         if (state.phone_qr && state.phone_qr !== this._qrPath) {
             this._qrPath = state.phone_qr;

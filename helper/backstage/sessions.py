@@ -68,13 +68,15 @@ class Session:
             return "\n".join(f"[{clock(ts)}] {'Me' if s == 'me' else 'Them'}: {t}"
                              for ts, s, t in self.lines)
 
-    def add_analysis(self, answer, screenshot, reason):
-        """reason: why it ran, e.g. "screen changed" or the question heard."""
+    def add_analysis(self, answer, screenshot, reason, steered=False):
+        """reason: why it ran, e.g. "screen changed" or the question heard.
+        steered: the answer looks like text on the screen tried to steer it."""
         now = time.time()
         shot = f"\n\n![screenshot](screenshots/{Path(screenshot).name})"
         with self._lock:
             self._append("answers.md", f"## {clock(now)}, {reason}\n\n{answer}{shot}\n\n")
-            self._event("analysis", answer=answer, screenshot=str(screenshot), reason=reason, time=now)
+            self._event("analysis", answer=answer, screenshot=str(screenshot), reason=reason,
+                        steered=steered, time=now)
 
     def save_script(self, text):
         (self.folder / "script.txt").write_text(text)

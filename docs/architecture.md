@@ -13,7 +13,7 @@ Backstage is two programs that talk over D-Bus:
  +-----------------------------+             |  - assistant.py + providers.py --> AI CLI     |
                                              |  - speaker.py (Piper) ---- pw-play             |
                                              |  - share_watch.py <---- dbus-monitor           |
-                                             |  - phone.py (HTTP + live events) <---- phone   |
+                                             |  - phone.py (HTTPS + live events) <---- phone  |
                                              |  - sessions.py --> sessions/<folder>/          |
                                              +-----------------------------------------------+
 ```
@@ -41,10 +41,9 @@ take one directly.
 ## How a screen analysis happens
 
 1. Every `watch_interval` seconds the extension saves a screenshot to
-   `~/.local/state/backstage/live-frame.png` and calls `OfferFrame` with the
-   island's position.
-2. `watcher.py` blacks out the island's area, makes a 96x54 greyscale
-   fingerprint and compares it with:
+   `~/.local/state/backstage/live-frame.png` and calls `OfferFrame`.
+   The island is left out of the screenshot (see `screenshot.js`).
+2. `watcher.py` makes a 96x54 greyscale fingerprint and compares it with:
    - the frame just before (has the screen settled?)
    - the last frame analysed (did anything change?)
    It only continues if the screen settled, changed, and no analysis is
@@ -89,12 +88,13 @@ Bus name and interface `io.github.saiftherehman.Backstage`, object path
 | `GetState` | | JSON string with everything the island shows (below) |
 | `StartSession` | `kind` (`teleprompter` or `assistant`), `title` | session id (folder name) |
 | `StopSession` | | |
-| `OfferFrame` | `path`, `x`, `y`, `width`, `height` (island area to black out) | |
+| `OfferFrame` | `path` (screenshot without the island) | |
 | `AnalyseNow` | | |
 | `SetProvider` | `name` | |
 | `LoadScript` | `text` | |
 | `LoadDocument` | `path` | |
 | `JumpPrompter` | `line` | |
+| `SetPaused` | `paused` (true or false) | |
 
 | Signal | Arguments | When |
 | --- | --- | --- |
@@ -109,9 +109,14 @@ Bus name and interface `io.github.saiftherehman.Backstage`, object path
 State JSON fields: `active`, `kind`, `title`, `started` (Unix time), `folder`,
 `records`, `live_frame`, `watch_interval`, `providers` (list of `name`,
 `label`), `provider`, `script_lines`, `prompter_line`, `share_mode`, `mic_ok`,
-`phone_url`, `phone_qr`, `status`.
+`paused`, `private_windows`, `chat_notice`, `phone_url`, `phone_qr`,
+`phone_ca_url`, `phone_fingerprint`, `status`.
 
-Try it from a terminal:
+Only GNOME Shell may call the helper: `service.py` asks the bus for the
+caller's process and checks that its program is in `ALLOWED_PROGRAMS`.
+Signals are sent only to callers that passed, not to the whole bus. To try it
+from a terminal, run the helper by hand with `BACKSTAGE_ANY_CALLER=1` (see
+[development](development.md)), then:
 
 ```bash
 gdbus call --session -d io.github.saiftherehman.Backstage \
@@ -121,11 +126,15 @@ gdbus monitor --session -d io.github.saiftherehman.Backstage   # watch the signa
 
 ## Phone page protocol
 
-`phone.py` serves three addresses on `0.0.0.0:<port>`, each needing
-`?key=<phone key>`:
+`phone.py` serves HTTPS on `0.0.0.0:<port>`, with a certificate from
+`certificates.py`: a certificate authority made on this computer, limited to
+private network addresses, signs a certificate for the laptop's current
+address and a new one when the address changes. Every request but `/ca.crt`
+needs `?key=<phone key>`:
 
 | Request | Answer |
 | --- | --- |
+| `GET /ca.crt` | The certificate authority, to install on the phone. No key needed; it is public |
 | `GET /` | The page (`phone_page.html`) |
 | `GET /events` | Server-sent events: one JSON object per message with a `type` of `state`, `prompter`, `transcript`, `thinking`, `answer` or `error`. A new phone first gets the latest `state`, `answer` and `prompter` |
 | `POST /ask` | Same as Analyse now (at most once every 3 seconds). Answers 204 |
@@ -136,7 +145,8 @@ gdbus monitor --session -d io.github.saiftherehman.Backstage   # watch the signa
 | --- | --- |
 | `~/.config/systemd/user/backstage-helper.service` | The helper service, written by install.sh from `systemd/backstage-helper.service` |
 | `~/.local/share/gnome-shell/extensions/backstage@saiftherehman.github.io` | Link to the extension folder |
-| `~/.local/state/backstage/` | Phone key, QR code, live screenshot (folder readable only by you) |
+| `~/.local/state/backstage/` | Phone key, QR code, live screenshot, `tls/` certificates (folder readable only by you) |
+| GNOME keyring entry "Backstage records key" | Key for encrypted records, made the first time a session is encrypted |
 | `~/.cache/backstage-preview/` | Home folder of the preview window |
 | GNOME settings | Extension enabled, `Super+A` freed from the app grid, `Super+Alt+P` custom shortcut |
 
@@ -146,24 +156,27 @@ gdbus monitor --session -d io.github.saiftherehman.Backstage   # watch the signa
 config.toml                 all settings
 install.sh / uninstall.sh   set up / remove
 tools/preview.sh            isolated preview window
+tools/records.sh            open or encrypt session records
 helper/backstage/           the helper (run as: python -m backstage)
     __main__.py             start, signal handling, private file permissions
     app.py                  sessions, routing, read-aloud rules
-    service.py              D-Bus interface
+    service.py              D-Bus interface, caller check
     config.py               reads config.toml
     audio.py                pw-record recorders, microphone checks
     transcriber.py          pause detection, Whisper
     prompter.py             script lines, voice following with Vosk
     documents.py            .pptx, .docx, .pdf, .txt, .md to text
-    watcher.py              frame comparison, masking, shrinking
-    assistant.py            prompts, summaries
+    watcher.py              frame comparison, shrinking
+    assistant.py            prompts, summaries, steered answer check
     providers.py            Claude Code, Codex and Gemini command line calls
     questions.py            spots spoken questions
     speaker.py              Piper voice, pw-play
     share_watch.py          window share or entire screen share
-    phone.py                phone page server
+    phone.py                phone page server (HTTPS)
+    certificates.py         certificates for the phone page
     phone_page.html         phone page
     sessions.py             session folders
+    vault.py                encrypted records, key in the GNOME keyring
 extension/backstage@saiftherehman.github.io/
     extension.js            wiring: helper, hotkeys, screenshot loop, file picker
     helperClient.js         D-Bus client

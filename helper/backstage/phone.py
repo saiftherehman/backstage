@@ -5,14 +5,16 @@ connected to the same Wi-Fi. The page shows answers, the teleprompter and the
 transcript live, and has an Analyse now button.
 
 Protection:
+- HTTPS with a certificate made on this computer (see certificates.py), so
+  others on the same Wi-Fi cannot read the traffic or the key
 - every request needs the random key from the link (kept in
   ~/.local/state/backstage/phone-key, readable only by you)
 - only devices on a private network (home or office Wi-Fi) are answered
 - at most MAX_PHONES connections, and Analyse now at most every few seconds
 - the page cannot be framed, cached or leak its link through a referrer
 
-The traffic is plain HTTP, so someone else on the same Wi-Fi who captures it
-could read it. Turn the page off in config.toml on networks you do not trust.
+/ca.crt needs no key: it is the public half of the certificate authority,
+for installing on the phone so it stops warning about the certificate.
 """
 
 import ipaddress
@@ -20,6 +22,7 @@ import json
 import queue
 import secrets
 import socket
+import ssl
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -28,12 +31,17 @@ from urllib.parse import parse_qs, urlparse
 
 import segno
 
+from .certificates import Certificates
+
 STATE_DIR = Path.home() / ".local/state/backstage"
 KEY_FILE = STATE_DIR / "phone-key"
 QR_FILE = STATE_DIR / "phone-qr.png"
+TLS_DIR = STATE_DIR / "tls"
 PAGE = Path(__file__).with_name("phone_page.html")
 MAX_PHONES = 4
 ASK_GAP_SECONDS = 3
+# Seconds a phone may take to finish the TLS handshake or send a request.
+CONNECTION_TIMEOUT = 30
 SECURITY_HEADERS = {
     "Cache-Control": "no-store",
     "Referrer-Policy": "no-referrer",
@@ -76,18 +84,29 @@ class PhoneServer:
         self._lock = threading.Lock()
         self._url = ""
         self._last_ask = 0.0
-        server = ThreadingHTTPServer(("0.0.0.0", port), self._handler())
+        self.certificates = Certificates(TLS_DIR)
+        self.fingerprint = ""
+        self._tls = None
+        self.url   # makes the certificate before the first phone connects
+        server = TLSServer(("0.0.0.0", port), self._handler(), lambda: self._tls)
         server.daemon_threads = True
         threading.Thread(target=server.serve_forever, daemon=True).start()
 
     @property
     def url(self):
-        """Link for the phone. The QR code is redrawn when the address changes."""
-        url = f"http://{lan_address()}:{self.port}/?key={self.key}"
+        """Link for the phone. The certificate and QR code are remade when
+        the address changes."""
+        address = lan_address()
+        url = f"https://{address}:{self.port}/?key={self.key}"
         if url != self._url:
+            self._tls, self.fingerprint = self.certificates.context(address)
             segno.make(url, error="m").save(QR_FILE, scale=8, border=2, dark="#111111", light="#ffffff")
             self._url = url
         return url
+
+    @property
+    def ca_url(self):
+        return f"https://{lan_address()}:{self.port}/ca.crt"
 
     @property
     def connected(self):
@@ -126,6 +145,8 @@ class PhoneServer:
         server = self
 
         class Handler(BaseHTTPRequestHandler):
+            timeout = CONNECTION_TIMEOUT
+
             def log_message(self, *args):
                 pass
 
@@ -134,9 +155,14 @@ class PhoneServer:
                     self.send_header(name, value)
                 super().end_headers()
 
+            def _private(self):
+                if ipaddress.ip_address(self.client_address[0]).is_private:
+                    return True
+                self.send_error(403)
+                return False
+
             def _allowed(self):
-                if not ipaddress.ip_address(self.client_address[0]).is_private:
-                    self.send_error(403)
+                if not self._private():
                     return False
                 key = parse_qs(urlparse(self.path).query).get("key", [""])[0]
                 if secrets.compare_digest(key, server.key):
@@ -146,6 +172,10 @@ class PhoneServer:
 
             def do_GET(self):
                 path = urlparse(self.path).path
+                if path == "/ca.crt":
+                    if self._private():
+                        self._send_ca()
+                    return
                 if not self._allowed():
                     return
                 if path == "/":
@@ -170,6 +200,15 @@ class PhoneServer:
                 else:
                     self.send_error(404)
 
+            def _send_ca(self):
+                body = server.certificates.ca_bytes
+                self.send_response(200)
+                self.send_header("Content-Type", "application/x-x509-ca-cert")
+                self.send_header("Content-Disposition", 'attachment; filename="backstage-ca.crt"')
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
             def _stream(self):
                 client = server._subscribe()
                 if client is None:
@@ -193,3 +232,28 @@ class PhoneServer:
                     server._unsubscribe(client)
 
         return Handler
+
+
+class TLSServer(ThreadingHTTPServer):
+    """Does the TLS handshake in each connection's own thread, so a slow or
+    broken phone never holds up the others. tls() returns the current
+    settings, which change when the network address does."""
+
+    def __init__(self, address, handler, tls):
+        super().__init__(address, handler)
+        self._tls = tls
+
+    def finish_request(self, request, client_address):
+        request.settimeout(CONNECTION_TIMEOUT)
+        try:
+            request = self._tls().wrap_socket(request, server_side=True)
+        except (ssl.SSLError, OSError):
+            request.close()   # plain HTTP, a refused certificate, or a dropped connection
+            return
+        try:
+            super().finish_request(request, client_address)
+        finally:
+            request.close()
+
+    def handle_error(self, request, client_address):
+        pass   # a phone going away mid-request is normal

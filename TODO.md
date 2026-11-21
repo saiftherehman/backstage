@@ -36,31 +36,25 @@ Today it opens from the island at the top centre and the keys. Add:
   (island, top bar icon, dock launcher) and to change the keys, so nothing
   has to be edited by hand.
 
-## Close the remaining security issues
+## Security: what is left
 
-The open risks from the security review in
-[docs/privacy-and-security.md](docs/privacy-and-security.md):
+From the security review in
+[docs/privacy-and-security.md](docs/privacy-and-security.md). The rest is done.
 
-- **Phone page over HTTPS.** Traffic is plain HTTP today, so someone on the
-  same Wi-Fi who captures it can read answers, the transcript and the key.
-  Options: a local certificate the phone trusts once (install it on the phone
-  from the Phone tab), or end-to-end encrypt the messages in the page with a
-  key carried in the link's `#fragment` (never sent over the network).
-- **Keep sensitive screens out of the AI.** Anything on screen is sent during
-  an assistant session. Add a pause key, skip analysis while chosen apps are
-  in front (password manager, banking, private chats), and optionally blur
-  areas that look like passwords or card numbers before sending.
-- **Prompt injection.** Text on screen can still try to steer the answer.
-  Mark answers that look steered (for example ones that repeat instructions
-  from the screen) and keep the AI tools without any tools or write access.
-- **Restrict who can call the helper.** Any program running as you can use
-  the D-Bus interface. Accept calls only from GNOME Shell and the preview,
-  by checking the caller's process.
-- **Encrypt records at rest.** Sessions are plain files (owner-only).
-  Optionally encrypt each session folder with a key from the GNOME keyring.
-- **Consent.** Show a clear recording mark in the island while a session
-  records, and add an optional spoken or chat notice that the meeting is
-  being transcribed.
+- **Blur passwords and card numbers.** Before a screenshot is sent, find
+  areas that look like password fields, card numbers or one-time codes and
+  blur them. Needs text recognition on the laptop (for example Tesseract),
+  which is not installed yet; the pause key and private windows cover it
+  until then.
+- **Spoken recording notice.** The chat notice works; a spoken one would have
+  to play into the meeting's audio, which only happens when the meeting app
+  shares system audio. Possible with a virtual microphone (PipeWire
+  loopback) that mixes the notice into what the meeting hears.
+- **Check Codex and Gemini CLI for tool access.** Claude Code runs with no
+  tools. Codex (read-only sandbox) can still read files, and Gemini CLI runs
+  its read-only tools without asking. Neither is installed here to test;
+  find each tool's flag to turn tools off completely and use it in
+  `providers.py`.
 
 ## Island position and see-through: loose ends
 

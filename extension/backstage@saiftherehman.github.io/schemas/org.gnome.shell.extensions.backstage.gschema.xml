@@ -17,6 +17,10 @@
       <default><![CDATA[['<Super><Alt>Down']]]></default>
       <summary>Move the teleprompter one line forward</summary>
     </key>
+    <key name="pause-assistant" type="as">
+      <default><![CDATA[['<Super><Alt>h']]]></default>
+      <summary>Pause or resume sending the screen to the AI</summary>
+    </key>
     <key name="island-position" type="(ii)">
       <default>(-1, -1)</default>
       <summary>Where the island was dragged to</summary>

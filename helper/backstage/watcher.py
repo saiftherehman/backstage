@@ -7,14 +7,14 @@ session. A frame is only analysed when:
   nothing is sent while you scroll or type
 - no analysis is already running (only the newest frame matters)
 
-Frames are shrunk before sending, since image tokens grow with size, and the
-island's own area is blacked out so the AI never reads its earlier answers.
+Frames are shrunk before sending, since image tokens grow with size. The
+island is already left out of each screenshot (see screenshot.js).
 """
 
 import threading
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image
 
 # Thumbnail used to compare frames: small enough to ignore a blinking cursor,
 # big enough to notice a new line of text.
@@ -26,12 +26,8 @@ JPEG_QUALITY = 70
 
 
 class Frame:
-    def __init__(self, path, mask):
-        """mask: (x, y, width, height) of the island, or None."""
+    def __init__(self, path):
         image = Image.open(path).convert("RGB")
-        if mask and mask[2] > 0 and mask[3] > 0:
-            x, y, w, h = mask
-            ImageDraw.Draw(image).rectangle((x, y, x + w, y + h), fill="black")
         self.image = image
         self.fingerprint = np.asarray(image.convert("L").resize(THUMB), dtype=np.int16)
 
@@ -65,7 +61,7 @@ class ScreenWatcher:
         self._analysed = None
         self._force_next = None
 
-    def offer(self, path, mask, force=False, reason=""):
+    def offer(self, path, force=False, reason=""):
         """Called with each new screenshot; returns at once. If an analysis is
         still running the frame is dropped, but a forced request is kept for
         the next frame."""
@@ -76,11 +72,11 @@ class ScreenWatcher:
         if self._force_next is not None:
             force, reason, self._force_next = True, self._force_next, None
         self._busy = True
-        threading.Thread(target=self._run, args=(path, mask, force, reason), daemon=True).start()
+        threading.Thread(target=self._run, args=(path, force, reason), daemon=True).start()
 
-    def _run(self, path, mask, force, reason):
+    def _run(self, path, force, reason):
         try:
-            frame = Frame(path, mask)
+            frame = Frame(path)
             settled = not frame.differs_from(self._previous, self.min_change)
             self._previous = frame
             new = frame.differs_from(self._analysed, self.min_change)

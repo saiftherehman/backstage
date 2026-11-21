@@ -11,8 +11,9 @@ top of the screen gives you:
 - **Phone**: the assistant's output on your phone, as a second screen. When
   you share your entire screen the island hides and the phone takes over; with
   your microphone off, answers are also read aloud.
-- **Records**: every session saved as plain files: transcript, answers with
-  screenshots, summary and action items.
+- **Records**: every session saved as files: transcript, answers with
+  screenshots, summary and action items. Optionally encrypted with a key in
+  the GNOME keyring.
 
 Speech recognition, the voice and the records run on your computer. Screen
 analysis uses a command line AI tool you are already signed in to (Claude Code;
@@ -45,6 +46,7 @@ Remove it with `./uninstall.sh`. Your records in `sessions/` are kept.
 | `Super+A` | Start the assistant, or analyse now |
 | `Super+Alt+N` | Open or close the island |
 | `Super+Alt+Up` / `Down` | Teleprompter line back / forward |
+| `Super+Alt+H` | Pause or resume sending the screen to the AI |
 | `Super+Alt+P` | Preview window |
 
 ## Documentation
@@ -65,6 +67,9 @@ Remove it with `./uninstall.sh`. Your records in `sessions/` are kept.
 | AI tool, model, how often the screen is checked | `[assistant]` in `config.toml` |
 | When answers are read aloud, voice | `[voice]` in `config.toml` |
 | Phone page on or off, port | `[phone]` in `config.toml` |
+| Apps never sent to the AI, chat notice, encrypted records | `[privacy]`, `[consent]`, `[sessions]` in `config.toml` |
+| Which programs may call the helper | `ALLOWED_PROGRAMS` in `helper/backstage/service.py` |
+| Phone certificates | `helper/backstage/certificates.py`, files in `~/.local/state/backstage/tls/` |
 | Answer wording | top of `helper/backstage/assistant.py` |
 | Hotkeys | `extension/backstage@saiftherehman.github.io/schemas/` |
 | Look of the island | `extension/backstage@saiftherehman.github.io/stylesheet.css` |

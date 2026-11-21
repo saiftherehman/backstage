@@ -55,8 +55,10 @@ class Island extends St.BoxLayout {
         this._dot = new St.Widget({style_class: 'backstage-dot', y_align: Clutter.ActorAlign.CENTER});
         this._pillLabel = new St.Label({style_class: 'backstage-pill-label', y_align: Clutter.ActorAlign.CENTER, x_expand: true});
         this._timer = new St.Label({style_class: 'backstage-pill-timer', y_align: Clutter.ActorAlign.CENTER});
+        this._rec = new St.Label({text: 'REC', style_class: 'backstage-rec', y_align: Clutter.ActorAlign.CENTER, visible: false});
         pill.add_child(this._dot);
         pill.add_child(this._pillLabel);
+        pill.add_child(this._rec);
         pill.add_child(this._timer);
         const pillButton = new St.Button({child: pill, can_focus: false, x_expand: true});
         pillButton.connect('clicked', () => this.setExpanded(!this._expanded));
@@ -138,6 +140,7 @@ class Island extends St.BoxLayout {
 
     setSessionStart(startedAt) {
         this._startedAt = startedAt;
+        this._rec.visible = Boolean(startedAt);
         if (startedAt)
             this._dot.add_style_pseudo_class('active');
         else

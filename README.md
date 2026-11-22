@@ -74,6 +74,7 @@ Remove it with `./uninstall.sh`. Your records in `sessions/` are kept.
 | Hotkeys | `extension/backstage@saiftherehman.github.io/schemas/` |
 | Look of the island | `extension/backstage@saiftherehman.github.io/stylesheet.css` |
 | How see-through the island is | `IDLE_OPACITY` in `island.js` and `.backstage` in `stylesheet.css` |
+| Island always on screen, or top bar icon | Extensions app > Backstage > Settings, or `display` in the schema |
 
 After editing `config.toml`: `systemctl --user restart backstage-helper`.
 

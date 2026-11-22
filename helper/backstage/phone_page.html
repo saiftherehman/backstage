@@ -85,7 +85,8 @@
   function renderState() {
     $("dot").classList.toggle("on", !!state.active);
     $("rec").hidden = !state.active;
-    $("status").textContent = state.active ? state.title : (state.status || "No session running");
+    const saved = state.last_saved ? "Saved: " + state.last_saved : "";
+    $("status").textContent = state.active ? state.title : (state.status || saved || "No session running");
     renderPrompter();
   }
 

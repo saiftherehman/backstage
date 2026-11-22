@@ -103,6 +103,9 @@ gsettings --schemadir ~/.local/share/gnome-shell/extensions/backstage@saifthereh
   set org.gnome.shell.extensions.backstage ask-now "['<Control><Alt>a']"
 ```
 
+The same file has two more settings: `display` (`island` or `top-bar`, see
+[Island or top bar](user-guide.md#island-or-top-bar)) and `island-position`.
+
 The preview shortcut (`Super+Alt+P`) is a normal GNOME custom shortcut and can
 be changed in Settings > Keyboard > Keyboard Shortcuts > Custom Shortcuts.
 

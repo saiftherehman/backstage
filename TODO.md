@@ -22,19 +22,19 @@ Notes:
 
 ## More ways to open Backstage
 
-Today it opens from the island at the top centre and the keys. Add:
+Done: a top bar icon with a menu (start, stop and save, show island, open
+records, settings), and a settings window to choose between the island
+always on screen and the top bar icon. Left to do:
 
-- **Top bar:** a Backstage icon in the GNOME top bar with a menu: start
-  teleprompter, start assistant, stop and save, open the island, open records,
-  phone link.
+- **Top bar menu:** add the phone link.
 - **Bottom bar (dock):** a launcher on the Ubuntu dock that opens the island,
   with right-click actions for the same items.
 - **Keys:** a key for each action, all changeable (start teleprompter, start
   assistant, stop and save, open records), alongside the current `Super+A`,
   `Super+Alt+N`, `Super+Alt+Up`/`Down` and `Super+Alt+P`.
-- **Settings:** a small settings window to choose which of these are shown
-  (island, top bar icon, dock launcher) and to change the keys, so nothing
-  has to be edited by hand.
+- **Settings:** the settings window (`prefs.js`) only has the island or top
+  bar choice. Add the dock launcher and the keys, so nothing has to be edited
+  by hand.
 
 ## Security: what is left
 
@@ -63,7 +63,7 @@ is on it. Left to do:
 
 - **Reset without a terminal.** Putting it back at the top centre needs a
   `gsettings` command and an extension restart. Add a "Back to top centre"
-  item (in the settings window above, or on a right-click of the pill), and
+  item (in the settings window, or on a right-click of the pill), and
   have the island listen for changes to `island-position` so it moves at once.
 - **One setting for see-through.** The amount is set in two places today
   (`IDLE_OPACITY` in `island.js` and the `.backstage` background in

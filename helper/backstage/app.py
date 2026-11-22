@@ -56,6 +56,7 @@ class BackstageApp:
         self._bus_emit = emit
         self.session = None
         self.status = ""
+        self.last_saved = ""     # folder (or .backstage file) of the last session
         self._recorders = []
         self._follower = None
         self._speaking = False
@@ -102,6 +103,7 @@ class BackstageApp:
             "started": session.started if session else 0,
             "folder": str(session.folder) if session else "",
             "records": str(self.config["sessions"]["folder"]),
+            "last_saved": self.last_saved,
             "live_frame": str(LIVE_FRAME),
             "watch_interval": self.config["assistant"]["watch_interval"],
             "providers": [{"name": p.name, "label": p.label} for p in providers.available()],
@@ -156,7 +158,9 @@ class BackstageApp:
         self.transcriber.clear()
         self.session = None
         session.close(self.assistant.provider_name)
-        self._set_status("Saved to " + session.folder.name)
+        # The island and phone show last_saved instead of a status line.
+        self.last_saved = str(session.folder)
+        self._set_status("")
         threading.Thread(target=self._finish, args=(session,), daemon=True).start()
 
     def _finish(self, session):
@@ -170,7 +174,10 @@ class BackstageApp:
                 self.emit("Error", f"Summary failed: {error}")
         if self.config["sessions"]["encrypt"]:
             try:
-                vault.seal(session.folder)
+                sealed = vault.seal(session.folder)
+                if self.last_saved == str(session.folder):
+                    self.last_saved = str(sealed)
+                    self._changed()
             except Exception as error:
                 self.emit("Error", f"Could not encrypt {session.folder.name}: {error}")
 

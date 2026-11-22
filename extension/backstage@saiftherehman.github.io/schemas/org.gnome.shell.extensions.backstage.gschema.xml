@@ -21,6 +21,15 @@
       <default><![CDATA[['<Super><Alt>h']]]></default>
       <summary>Pause or resume sending the screen to the AI</summary>
     </key>
+    <key name="display" type="s">
+      <choices>
+        <choice value="island"/>
+        <choice value="top-bar"/>
+      </choices>
+      <default>'island'</default>
+      <summary>Where Backstage lives</summary>
+      <description>"island": the island is always on screen. "top-bar": an icon in the top bar, and the island only shows during a session.</description>
+    </key>
     <key name="island-position" type="(ii)">
       <default>(-1, -1)</default>
       <summary>Where the island was dragged to</summary>

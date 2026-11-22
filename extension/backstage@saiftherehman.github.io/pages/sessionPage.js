@@ -1,5 +1,5 @@
 // Session page: what is running (teleprompter or assistant session), where
-// its output goes, the live transcript, and the saved records.
+// its output goes, the live transcript, and where the last one was saved.
 
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
@@ -15,6 +15,8 @@ class SessionPage extends St.BoxLayout {
     _init(actions) {
         super._init({orientation: Clutter.Orientation.VERTICAL, style_class: 'backstage-page'});
         this._lines = [];
+        this._state = null;
+        this._saved = '';
 
         this._title = new St.Label({style_class: 'backstage-session-title'});
         this.add_child(this._title);
@@ -28,21 +30,17 @@ class SessionPage extends St.BoxLayout {
         const controls = new St.BoxLayout({style_class: 'backstage-controls'});
         this._stop = button('Stop and save', () => actions.stopSession(), 'backstage-button-primary');
         controls.add_child(this._stop);
+        this._dismiss = button('Dismiss', () => actions.dismissSaved());
+        controls.add_child(this._dismiss);
         controls.add_child(new St.Widget({x_expand: true}));
-        controls.add_child(button('Open records', () => actions.openRecords()));
+        this._open = button('Open records', () => actions.openRecords());
+        controls.add_child(this._open);
         this.add_child(controls);
     }
 
     setState(state) {
-        this._stop.visible = state.active;
-        if (state.active) {
-            this._title.text = `${KIND_LABELS[state.kind]}: ${state.title}`;
-            this._detail.text = this._where(state);
-        } else {
-            this._title.text = state.status || 'No session running';
-            this._detail.text = 'Start a session from the Teleprompter or Assistant tab. ' +
-                'Each session is saved as its own folder of records.';
-        }
+        this._state = state;
+        this._render();
         const warnings = [];
         if (!state.mic_ok)
             warnings.push('No microphone found, so only other people are transcribed and the ' +
@@ -52,6 +50,34 @@ class SessionPage extends St.BoxLayout {
         if (state.active && !this._wasActive)
             this._setLines([]);
         this._wasActive = state.active;
+    }
+
+    /** Path of the last saved session, or '' once dismissed. */
+    setSaved(path) {
+        this._saved = path;
+        this._render();
+    }
+
+    _render() {
+        const state = this._state;
+        if (!state)
+            return;
+        this._stop.visible = state.active;
+        this._dismiss.visible = !state.active && Boolean(this._saved);
+        this._open.label = this._dismiss.visible ? 'Open folder' : 'Open records';
+        if (state.active) {
+            this._title.text = `${KIND_LABELS[state.kind]}: ${state.title}`;
+            this._detail.text = this._where(state);
+        } else if (this._saved) {
+            this._title.text = 'Session saved';
+            this._detail.text = this._saved;
+            if (this._saved.endsWith('.backstage'))
+                this._detail.text += '\nEncrypted. Open it with tools/records.sh.';
+        } else {
+            this._title.text = state.status || 'No session running';
+            this._detail.text = 'Start a session from the Teleprompter or Assistant tab. ' +
+                'Each session is saved as its own folder of records.';
+        }
     }
 
     _where(state) {

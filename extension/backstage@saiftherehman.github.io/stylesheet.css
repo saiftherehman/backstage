@@ -54,6 +54,18 @@
     font-weight: 600;
 }
 
+/* Closes the "Saved" notice in the pill. */
+.backstage-dismiss {
+    color: #a8a8a8;
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.backstage-dismiss:hover {
+    color: #f2f2f2;
+    background-color: #333333;
+}
+
 .backstage-pill-timer {
     font-size: 13px;
     font-feature-settings: "tnum";
@@ -212,4 +224,9 @@
     font-size: 11px;
     font-family: monospace;
     color: #a8a8a8;
+}
+
+/* Top bar icon, red while a session records. */
+.backstage-indicator-active {
+    color: #ff453a;
 }

@@ -19,7 +19,7 @@ from pathlib import Path
 
 
 def slug(text):
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:40] or "meeting"
+    return re.sub(r"[^a-z0-9]+", "-", text.lower())[:40].strip("-") or "meeting"
 
 
 def clock(timestamp):

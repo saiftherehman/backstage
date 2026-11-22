@@ -110,7 +110,8 @@ State JSON fields: `active`, `kind`, `title`, `started` (Unix time), `folder`,
 `records`, `live_frame`, `watch_interval`, `providers` (list of `name`,
 `label`), `provider`, `script_lines`, `prompter_line`, `share_mode`, `mic_ok`,
 `paused`, `private_windows`, `chat_notice`, `phone_url`, `phone_qr`,
-`phone_ca_url`, `phone_fingerprint`, `status`.
+`phone_ca_url`, `phone_fingerprint`, `status`, `last_saved` (folder or
+`.backstage` file of the last session that ended, empty before the first).
 
 Only GNOME Shell may call the helper: `service.py` asks the bus for the
 caller's process and checks that its program is in `ALLOWED_PROGRAMS`.
@@ -178,14 +179,18 @@ helper/backstage/           the helper (run as: python -m backstage)
     sessions.py             session folders
     vault.py                encrypted records, key in the GNOME keyring
 extension/backstage@saiftherehman.github.io/
-    extension.js            wiring: helper, hotkeys, screenshot loop, file picker
+    extension.js            wiring: helper, hotkeys, screenshot loop, file picker,
+                            island or top bar mode
     helperClient.js         D-Bus client
-    island.js               pill, tabs, position, dragging, see-through fade
+    island.js               pill, tabs, position, dragging, see-through fade,
+                            saved notice
+    topBar.js               top bar icon and menu (top-bar mode)
+    prefs.js                settings window
     pages/                  teleprompter, assistant, session and phone tabs
     widgets.js              shared buttons and labels
     screenshot.js           screenshots inside GNOME Shell
     stylesheet.css          look of the island
-    schemas/                hotkey settings, saved island position
+    schemas/                hotkeys, island or top bar, saved island position
 systemd/backstage-helper.service   service template
 docs/                       this documentation
 models/                     speech and voice models (not in git)

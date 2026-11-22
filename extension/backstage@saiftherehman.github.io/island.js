@@ -1,10 +1,12 @@
 // The island: a small pill at the top centre that opens into four pages.
 // It stays see-through until the pointer is on it, and can be dragged
-// anywhere by its pill; the spot is remembered.
+// anywhere by its pill; the spot is remembered. After a session it shows
+// where the records were saved until that notice is dismissed.
 
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
+import Pango from 'gi://Pango';
 import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -49,11 +51,13 @@ class Island extends St.BoxLayout {
         this._expanded = false;
         this._startedAt = 0;
         this._message = 'Backstage';
+        this._saved = '';
 
         // Collapsed pill
         const pill = new St.BoxLayout({style_class: 'backstage-pill'});
         this._dot = new St.Widget({style_class: 'backstage-dot', y_align: Clutter.ActorAlign.CENTER});
         this._pillLabel = new St.Label({style_class: 'backstage-pill-label', y_align: Clutter.ActorAlign.CENTER, x_expand: true});
+        this._pillLabel.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
         this._timer = new St.Label({style_class: 'backstage-pill-timer', y_align: Clutter.ActorAlign.CENTER});
         this._rec = new St.Label({text: 'REC', style_class: 'backstage-rec', y_align: Clutter.ActorAlign.CENTER, visible: false});
         pill.add_child(this._dot);
@@ -63,7 +67,18 @@ class Island extends St.BoxLayout {
         const pillButton = new St.Button({child: pill, can_focus: false, x_expand: true});
         pillButton.connect('clicked', () => this.setExpanded(!this._expanded));
         pillButton.connect('captured-event', (actor, event) => this._onPillEvent(actor, event));
-        this.add_child(pillButton);
+        this._dismiss = new St.Button({
+            style_class: 'backstage-dismiss',
+            child: new St.Icon({icon_name: 'window-close-symbolic', icon_size: 14}),
+            can_focus: false,
+            visible: false,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this._dismiss.connect('clicked', () => actions.dismissSaved());
+        const header = new St.BoxLayout();
+        header.add_child(pillButton);
+        header.add_child(this._dismiss);
+        this.add_child(header);
 
         // Expanded body
         this._body = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL, style_class: 'backstage-body'});
@@ -138,6 +153,18 @@ class Island extends St.BoxLayout {
         this._updatePill();
     }
 
+    get saved() {
+        return this._saved;
+    }
+
+    /** Path of the last saved session to point at, or '' for none. */
+    setSaved(path) {
+        this._saved = path;
+        this._dismiss.visible = Boolean(path);
+        this.session.setSaved(path);
+        this._updatePill();
+    }
+
     setSessionStart(startedAt) {
         this._startedAt = startedAt;
         this._rec.visible = Boolean(startedAt);
@@ -149,7 +176,9 @@ class Island extends St.BoxLayout {
     }
 
     _updatePill() {
-        this._pillLabel.text = this._message;
+        this._pillLabel.text = this._saved
+            ? `Saved: ${this._saved}`
+            : this._message;
         if (!this._startedAt) {
             this._timer.text = '';
             return;

@@ -16,6 +16,25 @@ gsettings --schemadir ~/.local/share/gnome-shell/extensions/backstage@saifthereh
 
 Then turn the extension off and on, or log out and back in.
 
+## Island or top bar
+
+Backstage can live in one of two places. Pick it in the Extensions app
+(Backstage > Settings) or from **Settings** in the top bar menu:
+
+- **Island, always on screen** (the default): the island stays at the top.
+- **Top bar icon, island only during a session**: a microphone icon sits in
+  the top bar and turns red while a session records. Its menu starts and stops
+  sessions, shows or hides the island, and opens the records. The island
+  appears when a session starts and goes away once you dismiss the
+  "Saved" notice after it ends. `Super+Alt+N` still opens it at any time.
+
+The same setting from a terminal:
+
+```bash
+gsettings --schemadir ~/.local/share/gnome-shell/extensions/backstage@saiftherehman.github.io/schemas \
+  set org.gnome.shell.extensions.backstage display top-bar   # or island
+```
+
 ## Teleprompter
 
 For presentations and prepared talks.
@@ -84,8 +103,11 @@ Shows what is running (Teleprompter session or Assistant session), where its
 output is going right now, the last few lines of the live transcript, and a
 **Stop and save** button. **Open records** opens the session's folder.
 
-When a session stops, a summary with decisions and action items is written to
-its folder a few seconds later.
+When a session stops, the island shows **Saved:** and the full path of the
+session's folder (for example
+`/home/you/Scripts/Backstage/sessions/2026-11-22_1045_assistant_weekly-sync`),
+and the Session tab shows it too, with **Open folder** and **Dismiss**. The small cross next to the pill dismisses it too. A summary with
+decisions and action items is written to the folder a few seconds later.
 
 ## Phone
 
@@ -138,7 +160,7 @@ others hear the voice too.
 | `Super+Alt+N` | Open or close the island |
 | `Super+Alt+Up` / `Down` | Teleprompter one line back / forward |
 | `Super+Alt+H` | Pause or resume sending the screen to the AI |
-| `Super+Alt+P` | Open the preview window |
+| `Super+Alt+P` | Open the preview window (a test desktop, not the island) |
 
 Super is the Windows key. GNOME normally uses `Super+A` for the app grid;
 install.sh turns that off so Backstage can use it (press Super on its own and
@@ -152,7 +174,8 @@ without logging out. Click inside the window before using the keys.
 
 It has its own home folder (`~/.cache/backstage-preview`), settings and
 session bus, so your real desktop is not touched. While it is open the real
-helper is paused; it starts again when you close the window. Sessions you
+helper is paused, so the island on your real desktop says "Helper not
+running"; it starts again when you close the window. Sessions you
 record in it are saved to the normal `sessions/` folder.
 
 ## Records

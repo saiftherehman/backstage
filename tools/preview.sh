@@ -6,7 +6,7 @@
 #
 # While it runs, the real helper is paused (both use the phone page port)
 # and started again afterwards. Sessions recorded in the preview are saved
-# to the normal sessions/ folder.
+# to the normal records folder (~/Downloads/Backstage).
 set -u
 
 PROJECT="$(cd "$(dirname "$0")/.." && pwd)"

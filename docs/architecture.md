@@ -14,7 +14,7 @@ Backstage is two programs that talk over D-Bus:
                                              |  - speaker.py (Piper) ---- pw-play             |
                                              |  - share_watch.py <---- dbus-monitor           |
                                              |  - phone.py (HTTPS + live events) <---- phone  |
-                                             |  - sessions.py --> sessions/<folder>/          |
+                                             |  - sessions.py --> ~/Downloads/Backstage/      |
                                              +-----------------------------------------------+
 ```
 
@@ -131,13 +131,14 @@ gdbus monitor --session -d io.github.saiftherehman.Backstage   # watch the signa
 `certificates.py`: a certificate authority made on this computer, limited to
 private network addresses, signs a certificate for the laptop's current
 address and a new one when the address changes. Every request but `/ca.crt`
-needs `?key=<phone key>`:
+needs `?key=<phone key>`. The key lives in memory and is replaced when the
+helper starts and when a session stops:
 
 | Request | Answer |
 | --- | --- |
 | `GET /ca.crt` | The certificate authority, to install on the phone. No key needed; it is public |
 | `GET /` | The page (`phone_page.html`) |
-| `GET /events` | Server-sent events: one JSON object per message with a `type` of `state`, `prompter`, `transcript`, `thinking`, `answer` or `error`. A new phone first gets the latest `state`, `answer` and `prompter` |
+| `GET /events` | Server-sent events: one JSON object per message with a `type` of `state`, `prompter`, `transcript`, `thinking`, `answer`, `error` or `expired` (the key changed; the stream then closes). A new phone first gets the latest `state`, `answer` and `prompter` |
 | `POST /ask` | Same as Analyse now (at most once every 3 seconds). Answers 204 |
 
 ## Files outside the project
@@ -194,6 +195,5 @@ extension/backstage@saiftherehman.github.io/
 systemd/backstage-helper.service   service template
 docs/                       this documentation
 models/                     speech and voice models (not in git)
-sessions/                   meeting records (not in git)
 scripts/current.txt         last loaded script (not in git)
 ```

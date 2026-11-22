@@ -6,9 +6,7 @@ __pycache__/
 # Downloaded by install.sh (hundreds of MB)
 models/
 
-# Personal data: meeting records and the last loaded script
-sessions/*
-!sessions/.gitkeep
+# Personal data: the last loaded script (meeting records go to ~/Downloads/Backstage)
 scripts/*
 !scripts/.gitkeep
 

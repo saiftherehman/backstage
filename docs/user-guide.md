@@ -105,7 +105,7 @@ output is going right now, the last few lines of the live transcript, and a
 
 When a session stops, the island shows **Saved:** and the full path of the
 session's folder (for example
-`/home/you/Scripts/Backstage/sessions/2026-11-22_1045_assistant_weekly-sync`),
+`/home/you/Downloads/Backstage/2026-11-22_1045_assistant_weekly-sync`),
 and the Session tab shows it too, with **Open folder** and **Dismiss**. The small cross next to the pill dismisses it too. A summary with
 decisions and action items is written to the folder a few seconds later.
 
@@ -124,8 +124,9 @@ A second screen for the assistant.
 3. **Analyse now** on the phone does the same as `Super+A`.
 
 The link contains a private key. Anyone with the link can read your session,
-so do not share it. See [privacy and security](privacy-and-security.md) for how
-to make a new key.
+so do not share it. The key changes every time a session stops, so scan the
+code again before the next session; the old link stops working and the phone
+says so. See [privacy and security](privacy-and-security.md#the-phone-key).
 
 ## Screen sharing
 
@@ -176,14 +177,15 @@ It has its own home folder (`~/.cache/backstage-preview`), settings and
 session bus, so your real desktop is not touched. While it is open the real
 helper is paused, so the island on your real desktop says "Helper not
 running"; it starts again when you close the window. Sessions you
-record in it are saved to the normal `sessions/` folder.
+record in it are saved to the normal `~/Downloads/Backstage/` folder.
 
 ## Records
 
-Each session is a folder in `sessions/`, readable only by you:
+Each session is a folder in `~/Downloads/Backstage/`, readable only by you. Change
+the place with `folder` under `[sessions]` in `config.toml`.
 
 ```
-sessions/2026-11-21_1430_assistant_weekly-sync/
+~/Downloads/Backstage/2026-11-21_1430_assistant_weekly-sync/
     session.json      kind, title, start and end time, AI tool
     transcript.md     everything said, with times
     answers.md        assistant sessions: every analysis, with its screenshot
@@ -198,7 +200,7 @@ is usually the meeting.
 
 With `encrypt = true` under `[sessions]`, each folder becomes one encrypted
 `.backstage` file when the session ends. Open one with
-`tools/records.sh open sessions/<name>.backstage`; see
+`tools/records.sh open ~/Downloads/Backstage/<name>.backstage`; see
 [encrypted records](privacy-and-security.md#encrypted-records).
 
 In the transcript, "Me" is your microphone and "Them" is whatever the computer

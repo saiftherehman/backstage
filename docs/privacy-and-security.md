@@ -94,12 +94,13 @@ The page also:
 ### The phone key
 
 The key is 18 random bytes from Python's `secrets` module (about 144 bits),
-compared in constant time. It is stored in
-`~/.local/state/backstage/phone-key` (owner-only). To make a new one, which
-disconnects every phone using the old link:
+compared in constant time. It is kept only in the helper's memory, never
+on disk, and a new one is made when the helper starts and each time a session
+stops. The link and QR code of a session stop working when it ends: phones
+still on it are disconnected and told to scan the new code. Restarting the
+helper also makes a new key:
 
 ```bash
-rm ~/.local/state/backstage/phone-key
 systemctl --user restart backstage-helper
 ```
 
@@ -125,8 +126,8 @@ load a file as a script or listen in.
 
 ## What stays on the computer
 
-- `sessions/`: transcripts, answers, screenshots, summaries
-- `~/.local/state/backstage/`: phone key, QR code, certificates, the latest
+- `~/Downloads/Backstage/` (or the `folder` set under `[sessions]`): transcripts, answers, screenshots, summaries
+- `~/.local/state/backstage/`: the current QR code, certificates, the latest
   screenshot
 
 The helper creates every file with owner-only permissions (`umask 077`), so
@@ -139,15 +140,15 @@ session when it ends (after its summary). The folder becomes one file,
 encrypted with AES-256-GCM:
 
 ```
-sessions/2026-11-21_1430_assistant_weekly-sync.backstage
+~/Downloads/Backstage/2026-11-21_1430_assistant_weekly-sync.backstage
 ```
 
 The key is kept in the GNOME keyring as "Backstage records key", unlocked with
 your login, and made the first time it is needed. Folders already in
-`sessions/` are encrypted the next time the helper starts. To read a record:
+the records folder are encrypted the next time the helper starts. To read a record:
 
 ```bash
-tools/records.sh open sessions/2026-11-21_1430_assistant_weekly-sync.backstage
+tools/records.sh open ~/Downloads/Backstage/2026-11-21_1430_assistant_weekly-sync.backstage
 ```
 
 It is decrypted into a private folder in memory

@@ -1,8 +1,8 @@
 #!/bin/bash
 # Opens or encrypts Backstage session records ([sessions] encrypt = true).
 #
-#   tools/records.sh open sessions/2026-11-20_1430_assistant_weekly-sync.backstage
-#   tools/records.sh seal sessions/2026-11-20_1430_assistant_weekly-sync
+#   tools/records.sh open ~/Downloads/Backstage/2026-11-20_1430_assistant_weekly-sync.backstage
+#   tools/records.sh seal ~/Downloads/Backstage/2026-11-20_1430_assistant_weekly-sync
 #
 # "open" decrypts into a private folder in memory (cleared at logout) and
 # opens it in Files. The encrypted file is left as it is.

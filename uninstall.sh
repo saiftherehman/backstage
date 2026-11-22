@@ -1,6 +1,6 @@
 #!/bin/bash
 # Removes what install.sh set up. The project folder itself, including
-# sessions/ (your meeting records) and models/, is left alone.
+# models/, and your meeting records in ~/Downloads/Backstage, are left alone.
 set -uo pipefail
 
 UUID="backstage@saiftherehman.github.io"

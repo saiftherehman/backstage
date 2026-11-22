@@ -85,11 +85,12 @@ chat_notice = ""
 # Example: chat_notice = "Heads up: I am transcribing this meeting for my notes."
 
 [sessions]
-# Where meeting records are saved, relative to this folder.
-folder = "sessions"
+# Where meeting records are saved: each session gets its own folder in here.
+# A path relative to this project folder works too.
+folder = "~/Downloads/Backstage"
 # Write a summary with action items when a session ends.
 summary_on_stop = true
 # Encrypt each session when it ends, with a key kept in the GNOME keyring.
 # The folder becomes one .backstage file; open it with tools/records.sh.
-# Folders already in sessions/ are encrypted when the helper starts.
+# Folders already in the records folder are encrypted when the helper starts.
 encrypt = false

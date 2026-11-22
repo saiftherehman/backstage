@@ -131,6 +131,5 @@ gsettings set org.gnome.shell.keybindings toggle-application-view "[]"
 ./uninstall.sh
 ```
 
-It removes the service, the extension, the shortcuts and the phone key, and
-gives `Super+A` back to GNOME. Your `sessions/` records stay in the project
-folder.
+It removes the service, the extension, the shortcuts and the phone files, and
+gives `Super+A` back to GNOME. Your records in `~/Downloads/Backstage/` are kept.

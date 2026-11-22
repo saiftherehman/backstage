@@ -1,6 +1,6 @@
 """Saves each meeting as its own folder of plain files.
 
-sessions/2026-11-20_1430_assistant_weekly-sync/
+~/Downloads/Backstage/2026-11-20_1430_assistant_weekly-sync/
     session.json      kind, title, start and end time, AI tool used
     transcript.md     everything said, with times
     answers.md        assistant sessions: every screen analysis, with its screenshot

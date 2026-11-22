@@ -7,8 +7,9 @@ transcript live, and has an Analyse now button.
 Protection:
 - HTTPS with a certificate made on this computer (see certificates.py), so
   others on the same Wi-Fi cannot read the traffic or the key
-- every request needs the random key from the link (kept in
-  ~/.local/state/backstage/phone-key, readable only by you)
+- every request needs the random key from the link. The key is kept only in
+  memory and replaced when the helper starts and when a session ends, so
+  the link and QR code of a past session stop working
 - only devices on a private network (home or office Wi-Fi) are answered
 - at most MAX_PHONES connections, and Analyse now at most every few seconds
 - the page cannot be framed, cached or leak its link through a referrer
@@ -34,8 +35,6 @@ import segno
 from .certificates import Certificates
 
 STATE_DIR = Path.home() / ".local/state/backstage"
-KEY_FILE = STATE_DIR / "phone-key"
-QR_FILE = STATE_DIR / "phone-qr.png"
 TLS_DIR = STATE_DIR / "tls"
 PAGE = Path(__file__).with_name("phone_page.html")
 MAX_PHONES = 4
@@ -64,21 +63,15 @@ def lan_address():
             return "127.0.0.1"
 
 
-def load_key():
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
-    if not KEY_FILE.exists():
-        KEY_FILE.write_text(secrets.token_urlsafe(18))
-        KEY_FILE.chmod(0o600)
-    return KEY_FILE.read_text().strip()
-
-
 class PhoneServer:
-    qr_file = QR_FILE
-
     def __init__(self, port, on_ask):
         self.port = port
         self.on_ask = on_ask
-        self.key = load_key()
+        self.key = secrets.token_urlsafe(18)
+        self.qr_file = None
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        for old in STATE_DIR.glob("phone-qr*.png"):
+            old.unlink()
         self._clients = set()
         self._latest = {}
         self._lock = threading.Lock()
@@ -95,14 +88,34 @@ class PhoneServer:
     @property
     def url(self):
         """Link for the phone. The certificate and QR code are remade when
-        the address changes."""
+        the address or the key changes."""
         address = lan_address()
         url = f"https://{address}:{self.port}/?key={self.key}"
         if url != self._url:
             self._tls, self.fingerprint = self.certificates.context(address)
-            segno.make(url, error="m").save(QR_FILE, scale=8, border=2, dark="#111111", light="#ffffff")
+            self._save_qr(url)
             self._url = url
         return url
+
+    def _save_qr(self, url):
+        # A new file name each time, so the island sees the change and
+        # loads the new picture instead of a cached one.
+        if self.qr_file:
+            self.qr_file.unlink(missing_ok=True)
+        self.qr_file = STATE_DIR / f"phone-qr-{secrets.token_hex(4)}.png"
+        segno.make(url, error="m").save(self.qr_file, scale=8, border=2, dark="#111111", light="#ffffff")
+
+    def new_key(self):
+        """Replaces the key. Phones on the old link are told the link has
+        expired and disconnected; the next url call makes the new QR code."""
+        with self._lock:
+            self.key = secrets.token_urlsafe(18)
+            self._latest.clear()
+            expired = json.dumps({"type": "expired"})
+            for client in self._clients:
+                client.put(expired)
+                client.put(None)   # ends that phone's event stream
+        self.url
 
     @property
     def ca_url(self):
@@ -222,6 +235,8 @@ class PhoneServer:
                     while True:
                         try:
                             message = client.get(timeout=15)
+                            if message is None:
+                                break
                             self.wfile.write(f"data: {message}\n\n".encode())
                         except queue.Empty:
                             self.wfile.write(b": still here\n\n")   # keeps Wi-Fi sleep from dropping it

@@ -116,7 +116,7 @@ class BackstageApp:
             "private_windows": self.config["privacy"]["private_windows"],
             "chat_notice": self.config["consent"]["chat_notice"],
             "phone_url": self.phone.url if self.phone else "",
-            "phone_qr": str(self.phone.qr_file) if self.phone else "",
+            "phone_qr": str(self.phone.qr_file) if self.phone and self.phone.qr_file else "",
             "phone_ca_url": self.phone.ca_url if self.phone else "",
             "phone_fingerprint": self.phone.fingerprint if self.phone else "",
             "status": self.status,
@@ -160,6 +160,8 @@ class BackstageApp:
         session.close(self.assistant.provider_name)
         # The island and phone show last_saved instead of a status line.
         self.last_saved = str(session.folder)
+        if self.phone:
+            self.phone.new_key()   # the link used in this session stops working
         self._set_status("")
         threading.Thread(target=self._finish, args=(session,), daemon=True).start()
 

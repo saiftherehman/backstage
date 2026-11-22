@@ -37,7 +37,7 @@ cd ~/Scripts/Backstage
 Then log out and back in once (GNOME on Wayland loads new extensions at
 login). To try it before that, press `Super+Alt+P` for the preview window.
 
-Remove it with `./uninstall.sh`. Your records in `sessions/` are kept.
+Remove it with `./uninstall.sh`. Your records in `~/Downloads/Backstage/` are kept.
 
 ## Keys
 

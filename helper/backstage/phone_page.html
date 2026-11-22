@@ -151,10 +151,16 @@
     thinking: e => showUpdating(e.question),
     answer: e => showAnswer(e.question, e.answer),
     error: e => showError(e.message),
+    expired: () => {
+      events.close();
+      $("link").textContent = "The session ended and this link has expired. Scan the new code on the laptop.";
+      $("link").className = "off";
+    },
   };
 
+  let events;
   function connect() {
-    const events = new EventSource(`/events?key=${encodeURIComponent(key)}`);
+    events = new EventSource(`/events?key=${encodeURIComponent(key)}`);
     events.onopen = () => { $("link").textContent = "Connected to your laptop"; $("link").className = ""; };
     events.onmessage = m => { const e = JSON.parse(m.data); handlers[e.type]?.(e); };
     events.onerror = () => { $("link").textContent = "Connection lost, retrying..."; $("link").className = "off"; };

@@ -3,7 +3,7 @@
 When a session ends (after its summary), its folder is packed into one file,
 encrypted with AES-256-GCM, and the plain folder is deleted:
 
-    sessions/2026-11-20_1430_assistant_weekly-sync.backstage
+    ~/Downloads/Backstage/2026-11-20_1430_assistant_weekly-sync.backstage
 
 The key is 32 random bytes kept in the GNOME keyring under the label
 KEY_LABEL, so it is unlocked with your login and never stored in a file.
@@ -92,6 +92,8 @@ def seal_all(root):
     """Encrypts every plain session folder in root. Only called while no
     session runs, so any folder left is finished (or from a crash)."""
     sealed = []
+    if not Path(root).is_dir():
+        return sealed
     for folder in sorted(Path(root).iterdir()):
         if folder.is_dir() and (folder / "session.json").exists():
             sealed.append(seal(folder))

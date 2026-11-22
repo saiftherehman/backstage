@@ -87,7 +87,7 @@ Model passed to each tool. Empty means the tool's own default.
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `folder` | `"sessions"` | Where records are saved, relative to the project folder (or an absolute path) |
+| `folder` | `"~/Downloads/Backstage"` | Where records are saved, one folder per session. `~` and paths relative to the project folder work too |
 | `summary_on_stop` | `true` | Write `summary.md` when a session ends. Costs one AI call per session |
 | `encrypt` | `false` | Encrypt each session into one `.backstage` file when it ends, with a key in the GNOME keyring. Open with `tools/records.sh open`. See [encrypted records](privacy-and-security.md#encrypted-records) |
 

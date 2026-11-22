@@ -9,6 +9,8 @@ raw one. The system's default microphone is left as it is, so meeting apps
 are not affected.
 """
 
+import os
+import re
 import subprocess
 import time
 
@@ -18,6 +20,10 @@ from .phone import STATE_DIR
 SOURCE_NODE = "backstage.echo-cancel.source"
 CONFIG_FILE = STATE_DIR / "echo-cancel.conf"
 START_TIMEOUT = 3.0
+# PipeWire node names are letters, digits and ._:-@ only. Anything else in
+# [audio] mic could break out of the quoted string in CONFIG and load other
+# modules, so it is refused instead.
+NODE_NAME = re.compile(r"[A-Za-z0-9._:@-]+")
 
 CONFIG = """\
 context.properties = {{ log.level = 0 }}
@@ -62,9 +68,12 @@ class EchoCanceller:
         """mic_target: PipeWire node name of the microphone, or empty for the
         default. Returns the node to record the cleaned microphone from, or
         "" if PipeWire could not set it up."""
+        if mic_target and not NODE_NAME.fullmatch(mic_target):
+            return ""
         target = f'target.object = "{mic_target}"' if mic_target else ""
-        CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         CONFIG_FILE.write_text(CONFIG.format(target=target, source=SOURCE_NODE))
+        os.chmod(CONFIG_FILE, 0o600)
         self._process = subprocess.Popen(["pipewire", "-c", str(CONFIG_FILE)],
                                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         deadline = time.monotonic() + START_TIMEOUT

@@ -38,7 +38,7 @@ Model passed to each tool. Empty means the tool's own default.
 | `mic` | `""` | PipeWire node name of the microphone. Empty means the default input. List nodes with `wpctl status` |
 | `system` | `""` | Output to record the other people from. Empty means the default output |
 | `speech_level` | `0.01` | Loudness (0 to 1) above which a 100 ms chunk counts as speech. Raise it in a noisy room |
-| `echo_cancel` | `true` | During a session, remove what the speakers play from the microphone, so the other people do not land in your side of the transcript and audio. Runs a separate PipeWire echo-cancel process (WebRTC) and leaves the system microphone alone |
+| `echo_cancel` | `true` | During a session, remove what the speakers play from the microphone, so the other people do not land in your side of the transcript and audio. Runs a separate PipeWire echo-cancel process (WebRTC) and leaves the system microphone alone. Skipped, with a notice, if `mic` holds anything but letters, digits and `._:-@` |
 
 ## [speech]
 

@@ -37,6 +37,12 @@ From the security review in
   its read-only tools without asking. Neither is installed here to test;
   find each tool's flag to turn tools off completely and use it in
   `providers.py`.
+- **Pause the saved audio too.** Pause (`Super+Alt+H`) only stops
+  screenshots going to the AI tool; `audio.ogg` and the transcript keep
+  recording. Add a choice (a setting under `[recording]`, or a second button)
+  so pausing also writes silence to the audio file, the same way spoken
+  answers are left out in `app.py`, and shows **PAUSED** next to REC AUDIO
+  on the island and the phone page while it lasts.
 
 ## Island position and see-through: loose ends
 

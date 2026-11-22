@@ -22,7 +22,7 @@ Backstage can live in one of two places. Pick it in the Extensions app
 (Backstage > Settings) or from **Settings** in the top bar menu:
 
 - **Island, always on screen** (the default): the island stays at the top.
-- **Top bar icon, island only during a session**: a microphone icon sits in
+- **Top bar icon, island only during a session**: the Backstage logo sits in
   the top bar and turns red while a session records. Its menu starts and stops
   sessions, shows or hides the island, and opens the records. The island
   appears when a session starts and goes away once you dismiss the

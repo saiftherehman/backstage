@@ -7,7 +7,7 @@
     </key>
     <key name="ask-now" type="as">
       <default><![CDATA[['<Super>a']]]></default>
-      <summary>Answer the latest question, using a screenshot</summary>
+      <summary>Start an assistant session, or analyse the screen now</summary>
     </key>
     <key name="prompter-back" type="as">
       <default><![CDATA[['<Super><Alt>Up']]]></default>

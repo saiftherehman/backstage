@@ -18,6 +18,10 @@ top of the screen gives you:
   meeting's audio if you choose. Optionally encrypted with a key in the GNOME
   keyring.
 
+The island is see-through until you point at it and can be dragged anywhere.
+If you'd rather keep the screen clear, switch to a top bar icon in the
+settings: the island then only shows up during a session.
+
 Speech recognition, the voice and the records run on your computer. Screen
 analysis uses a command line AI tool you are already signed in to (Claude Code;
 Codex and Gemini CLI are supported but untested), with each call trimmed to

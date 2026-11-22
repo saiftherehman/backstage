@@ -3,19 +3,23 @@
 Backstage is two programs that talk over D-Bus:
 
 ```
- GNOME Shell (your desktop)                  Background helper (Python, systemd user service)
- +-----------------------------+   D-Bus     +-----------------------------------------------+
- | Extension: the island       | <---------> | app.py: sessions, routing                     |
- |  - tabs and buttons         |  methods    |  - audio.py ---- pw-record (mic, output)       |
- |  - hotkeys                  |  signals    |  - transcriber.py (Whisper)                    |
- |  - screenshot every 2 s     |             |  - prompter.py (Vosk, follows your voice)      |
- |  - file picker (zenity)     |             |  - watcher.py (which screenshots to analyse)   |
- +-----------------------------+             |  - assistant.py + providers.py --> AI CLI     |
-                                             |  - speaker.py (Piper) ---- pw-play             |
-                                             |  - share_watch.py <---- dbus-monitor           |
-                                             |  - phone.py (HTTPS + live events) <---- phone  |
-                                             |  - sessions.py --> ~/Downloads/Backstage/      |
-                                             +-----------------------------------------------+
+ GNOME Shell (your desktop)                    Background helper (Python, systemd user service)
+ +-------------------------------+   D-Bus     +------------------------------------------------+
+ | Extension: island or top bar  | <---------> | app.py: sessions, routing                      |
+ |  - tabs and buttons           | methods     |  - audio.py ---- pw-record (mic, output)       |
+ |  - hotkeys                    | signals     |  - echo.py (PipeWire echo removal)             |
+ |  - screenshot every 2 s       |             |  - recording.py --> audio.ogg (Opus)           |
+ |  - file picker (zenity)       |             |  - transcriber.py (Whisper)                    |
+ |  - settings window (prefs.js) |             |  - prompter.py (Vosk, follows your voice)      |
+ +-------------------------------+             |  - watcher.py (which screenshots to analyse)   |
+                                               |  - assistant.py + providers.py --> AI CLI      |
+                                               |  - speaker.py (Piper) ---- pw-play             |
+                                               |  - share_watch.py <---- dbus-monitor           |
+                                               |  - phone.py (HTTPS + live events) <---- phone  |
+                                               |    certificates.py (local CA)                  |
+                                               |  - sessions.py --> ~/Downloads/Backstage/      |
+                                               |    vault.py (encryption, key in GNOME keyring) |
+                                               +------------------------------------------------+
 ```
 
 Why two programs: GNOME Shell extensions run inside the desktop's own process.

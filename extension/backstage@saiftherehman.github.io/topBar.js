@@ -1,20 +1,24 @@
 // Top bar icon with a menu, used when the "display" setting is "top-bar".
 // The island then only shows during a session, or when opened from here.
 
+import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
 
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-const ICON = 'audio-input-microphone-symbolic';
+// The Backstage logo (curtain, light, performer). The "-symbolic" name lets
+// GNOME recolor it to match the top bar.
+const ICON_FILE = Gio.File.new_for_uri(import.meta.url).get_parent()
+    .get_child('icons').get_child('backstage-symbolic.svg');
 const KIND_LABELS = {teleprompter: 'Teleprompter session', assistant: 'Assistant session'};
 
 export const TopBarIcon = GObject.registerClass(
 class TopBarIcon extends PanelMenu.Button {
     _init(actions) {
         super._init(0.5, 'Backstage');
-        this._icon = new St.Icon({icon_name: ICON, style_class: 'system-status-icon'});
+        this._icon = new St.Icon({gicon: new Gio.FileIcon({file: ICON_FILE}), style_class: 'system-status-icon'});
         this.add_child(this._icon);
 
         const menu = this.menu;

@@ -32,6 +32,8 @@ After a change to the phone page, D-Bus access, privacy or records, go
 through these by hand (log out and back in first if the extension changed):
 
 1. Pill shows a red **REC** while a session runs, and the phone page does too.
+   With **Audio: both sides** chosen on the Session tab it shows **REC AUDIO**,
+   and the stopped session's folder has an `audio.ogg` that plays both sides.
 2. Assistant tab: **Pause** and `Super+Alt+H` stop analyses and the status
    says so; **Resume** starts them again.
 3. Focus a window listed in `[privacy] private_windows`: the status says the
@@ -43,6 +45,8 @@ through these by hand (log out and back in first if the extension changed):
 6. With `chat_notice` set, starting a session copies it to the clipboard.
 7. With `encrypt = true`, a stopped session turns into a `.backstage` file
    after its summary, and `tools/records.sh open` shows the files.
+8. Stopping a session changes the phone key: a connected phone says its link
+   expired, the old link gives 403, and the Phone tab shows a new QR code.
 
 ## Trying extension changes
 

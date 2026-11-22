@@ -35,6 +35,7 @@ INTERFACE = """
     <method name="LoadDocument"><arg type="s" direction="in" name="path"/></method>
     <method name="JumpPrompter"><arg type="i" direction="in" name="line"/></method>
     <method name="SetPaused"><arg type="b" direction="in" name="paused"/></method>
+    <method name="SetRecording"><arg type="s" direction="in" name="mode"/></method>
     <signal name="StateChanged"><arg type="s" name="state"/></signal>
     <signal name="Transcript"><arg type="s" name="speaker"/><arg type="s" name="text"/></signal>
     <signal name="PrompterMoved"><arg type="i" name="line"/></signal>
@@ -141,6 +142,8 @@ class Service:
                 app.jump_prompter(*args)
             elif method == "SetPaused":
                 app.set_paused(*args)
+            elif method == "SetRecording":
+                app.set_recording(*args)
             invocation.return_value(result)
         except Exception as error:
             invocation.return_dbus_error("io.github.saiftherehman.Backstage.Error", str(error))

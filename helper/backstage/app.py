@@ -3,6 +3,9 @@
 - teleprompter: records the meeting, the script line follows your voice
 - assistant: records the meeting and analyses the screen whenever it changes
 
+Either kind can also save the meeting's audio (recording.py), chosen before
+the session starts.
+
 Everything here may be called from worker threads. Updates go out through
 emit(): to the island over D-Bus, and mirrored to the phone page.
 
@@ -20,14 +23,18 @@ import threading
 import time
 from pathlib import Path
 
+import numpy as np
+
 from . import providers, vault
 from .assistant import STEERED_WARNING, Assistant, looks_steered
 from .audio import Recorder, microphone_available, microphone_live
 from .config import SCRIPTS_DIR
 from .documents import read_text
+from .echo import EchoCanceller
 from .phone import STATE_DIR, PhoneServer
 from .prompter import Prompter, VoiceFollower
 from .questions import QuestionDetector
+from .recording import FILE_NAME as AUDIO_FILE, MODES as RECORDING_MODES, AudioFile
 from .sessions import Session
 from .share_watch import ShareWatcher
 from .speaker import Speaker, speakable
@@ -58,11 +65,16 @@ class BackstageApp:
         self.status = ""
         self.last_saved = ""     # folder (or .backstage file) of the last session
         self._recorders = []
+        self._echo = EchoCanceller()
+        self._audio_file = None
         self._follower = None
         self._speaking = False
         self._last_spoken = ""
         self._heard_question = ""
         self.paused = False
+        self.recording = config["recording"]["mode"]
+        if self.recording not in RECORDING_MODES:
+            raise ValueError(f"[recording] mode must be one of {', '.join(RECORDING_MODES)}")
         STATE_DIR.mkdir(parents=True, exist_ok=True)
 
         speech, prompter, assistant = config["speech"], config["prompter"], config["assistant"]
@@ -113,6 +125,8 @@ class BackstageApp:
             "share_mode": self.share.mode,
             "mic_ok": microphone_available(self.config["audio"]["mic"]),
             "paused": self.paused,
+            "recording": self.recording,
+            "recording_audio": self._audio_file is not None,
             "private_windows": self.config["privacy"]["private_windows"],
             "chat_notice": self.config["consent"]["chat_notice"],
             "phone_url": self.phone.url if self.phone else "",
@@ -138,7 +152,7 @@ class BackstageApp:
             raise RuntimeError(f"A {self.session.kind} session is already running")
         if kind == "teleprompter" and not self.prompter.lines:
             raise RuntimeError("Load a script first")
-        self.session = Session(self.config["sessions"]["folder"], kind, title)
+        self.session = Session(self.config["sessions"]["folder"], kind, title, audio=self.recording)
         if kind == "teleprompter":
             self.session.save_script(self.script)
             self.prompter.position = 0
@@ -204,30 +218,68 @@ class BackstageApp:
             self._follower = VoiceFollower(speech["vosk_model"], self.prompter,
                                            lambda: self.emit("PrompterMoved", self.prompter.line))
 
+        has_mic = microphone_available(audio["mic"])
+        sources = ()
+        if self.recording != "off":
+            sources = ("me", "them") if self.recording == "both" and has_mic else ("them",)
+            self._audio_file = AudioFile(self.session.folder / AUDIO_FILE, sources,
+                                         self.config["recording"]["bitrate_kbps"])
+        audio_file = self._audio_file
+
+        def save(source, chunk):
+            if source in sources:
+                audio_file.feed(source, chunk)
+
         # While an answer is read aloud, both inputs hear it. Skip that audio so
-        # the voice never lands in the transcript or triggers another answer.
+        # the voice never lands in the transcript or triggers another answer,
+        # and save silence in its place so the audio file keeps its timing.
         def on_mic(chunk):
             if self._speaking:
+                save("me", np.zeros_like(chunk))
                 return
+            save("me", chunk)
             me.feed(chunk)
             if self._follower:
                 self._follower.feed(chunk)
 
         def on_output(chunk):
-            if not self._speaking:
-                them.feed(chunk)
+            if self._speaking:
+                save("them", np.zeros_like(chunk))
+                return
+            save("them", chunk)
+            them.feed(chunk)
 
         self._recorders = [Recorder(audio["system"], True, on_output)]
-        if microphone_available(audio["mic"]):
-            self._recorders.append(Recorder(audio["mic"], False, on_mic))
+        if has_mic:
+            self._recorders.append(Recorder(self._mic_node(), False, on_mic))
         for recorder in self._recorders:
             recorder.start()
+
+    def _mic_node(self):
+        """The microphone to record: cleaned of the speakers' sound when
+        [audio] echo_cancel is on and PipeWire can do it, the raw one if not."""
+        mic = self.config["audio"]["mic"]
+        if not self.config["audio"].get("echo_cancel", True):
+            return mic
+        cleaned = self._echo.start(mic)
+        if not cleaned:
+            self.emit("Error", "Echo removal could not start, so the microphone may "
+                      "also pick up the other people. Headphones avoid that.")
+            return mic
+        return cleaned
 
     def _stop_recording(self):
         for recorder in self._recorders:
             recorder.stop()
         self._recorders = []
+        self._echo.stop()
         self._follower = None
+        if self._audio_file:
+            try:
+                self._audio_file.close()
+            except Exception as error:
+                self.emit("Error", f"Could not finish the audio file: {error}")
+            self._audio_file = None
 
     def _on_text(self, speaker, text, timestamp):
         session = self.session
@@ -287,7 +339,7 @@ class BackstageApp:
         mode = self.config["voice"]["speak_answers"]
         if mode == "never" or self.share.mode != "screen" or self._speaking:
             return
-        own = {r.pid for r in self._recorders}
+        own = {r.pid for r in self._recorders} | {self._echo.pid}
         if mode != "always" and microphone_live(self.config["audio"]["mic"], own):
             return
         text = speakable(answer)
@@ -306,6 +358,15 @@ class BackstageApp:
             self._set_status("Paused: nothing is sent to the AI" if paused else "Watching the screen")
         else:
             self._changed()
+
+    def set_recording(self, mode):
+        """Whether the next session saves its audio: off, both or others."""
+        if mode not in RECORDING_MODES:
+            raise ValueError(f"Unknown recording mode {mode}")
+        if self.session:
+            raise RuntimeError("Choose the audio before starting the session")
+        self.recording = mode
+        self._changed()
 
     def set_provider(self, name):
         self.assistant.set_provider(name)

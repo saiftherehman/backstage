@@ -23,6 +23,7 @@ const INTERFACE = `
     <method name="LoadDocument"><arg type="s" direction="in" name="path"/></method>
     <method name="JumpPrompter"><arg type="i" direction="in" name="line"/></method>
     <method name="SetPaused"><arg type="b" direction="in" name="paused"/></method>
+    <method name="SetRecording"><arg type="s" direction="in" name="mode"/></method>
     <signal name="StateChanged"><arg type="s" name="state"/></signal>
     <signal name="Transcript"><arg type="s" name="speaker"/><arg type="s" name="text"/></signal>
     <signal name="PrompterMoved"><arg type="i" name="line"/></signal>
@@ -108,6 +109,10 @@ export class HelperClient {
 
     setPaused(paused) {
         return this._proxy.SetPausedAsync(paused);
+    }
+
+    setRecording(mode) {
+        return this._proxy.SetRecordingAsync(mode);
     }
 
     destroy() {

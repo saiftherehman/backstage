@@ -38,6 +38,7 @@ Model passed to each tool. Empty means the tool's own default.
 | `mic` | `""` | PipeWire node name of the microphone. Empty means the default input. List nodes with `wpctl status` |
 | `system` | `""` | Output to record the other people from. Empty means the default output |
 | `speech_level` | `0.01` | Loudness (0 to 1) above which a 100 ms chunk counts as speech. Raise it in a noisy room |
+| `echo_cancel` | `true` | During a session, remove what the speakers play from the microphone, so the other people do not land in your side of the transcript and audio. Runs a separate PipeWire echo-cancel process (WebRTC) and leaves the system microphone alone |
 
 ## [speech]
 
@@ -82,6 +83,13 @@ Model passed to each tool. Empty means the tool's own default.
 | Setting | Default | What it does |
 | --- | --- | --- |
 | `chat_notice` | `""` (off) | Copied to the clipboard when a session starts, to paste into the meeting chat |
+
+## [recording]
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `mode` | `"off"` | Whether a new session saves the meeting's audio as `audio.ogg`: `off`, `both` (your microphone and the other people, mixed) or `others` (only what the computer plays). The island's Session tab changes it before each session |
+| `bitrate_kbps` | `24` | Opus quality. 24 is clear speech, about 11 MB an hour |
 
 ## [sessions]
 

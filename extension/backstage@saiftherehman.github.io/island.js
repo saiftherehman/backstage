@@ -15,6 +15,7 @@ import {AssistantPage} from './pages/assistantPage.js';
 import {PhonePage} from './pages/phonePage.js';
 import {PrompterPage} from './pages/prompterPage.js';
 import {SessionPage} from './pages/sessionPage.js';
+import {shortPath} from './widgets.js';
 
 // Gap between the top bar and the island, in pixels.
 const TOP_GAP = 6;
@@ -27,6 +28,10 @@ const FADE_MS = 150;
 // How far the pointer must move, in pixels, before a press on the pill
 // becomes a drag instead of a click.
 const DRAG_THRESHOLD = 6;
+
+// Longest saved path the pill shows before cutting it short, so the
+// collapsed island stays narrow.
+const PILL_PATH_LENGTH = 40;
 
 // Saved position meaning "top centre".
 const NO_POSITION = -1;
@@ -165,9 +170,11 @@ class Island extends St.BoxLayout {
         this._updatePill();
     }
 
-    setSessionStart(startedAt) {
+    /** savingAudio: the meeting's audio is being saved, not only the transcript. */
+    setSessionStart(startedAt, savingAudio = false) {
         this._startedAt = startedAt;
         this._rec.visible = Boolean(startedAt);
+        this._rec.text = savingAudio ? 'REC AUDIO' : 'REC';
         if (startedAt)
             this._dot.add_style_pseudo_class('active');
         else
@@ -177,7 +184,7 @@ class Island extends St.BoxLayout {
 
     _updatePill() {
         this._pillLabel.text = this._saved
-            ? `Saved: ${this._saved}`
+            ? `Saved: ${shortPath(this._saved, PILL_PATH_LENGTH)}`
             : this._message;
         if (!this._startedAt) {
             this._timer.text = '';

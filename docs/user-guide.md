@@ -95,7 +95,8 @@ session.
 
 ## Session
 
-While a session records, the island shows a red dot and **REC**. If you set
+While a session records, the island shows a red dot and **REC**, or **REC
+AUDIO** when the meeting's audio is being saved too. If you set
 `chat_notice` in `config.toml`, that message is copied when a session starts,
 so you can paste it into the meeting chat to let people know.
 
@@ -103,10 +104,28 @@ Shows what is running (Teleprompter session or Assistant session), where its
 output is going right now, the last few lines of the live transcript, and a
 **Stop and save** button. **Open records** opens the session's folder.
 
-When a session stops, the island shows **Saved:** and the full path of the
-session's folder (for example
-`/home/you/Downloads/Backstage/2026-11-22_1045_assistant_weekly-sync`),
-and the Session tab shows it too, with **Open folder** and **Dismiss**. The small cross next to the pill dismisses it too. A summary with
+### Saving the meeting's audio
+
+Before a session starts, the **Audio** button on the Session tab chooses
+whether the meeting's audio is saved next to the transcript. Click it to step
+through:
+
+- **Audio: off**: transcript only (the default).
+- **Audio: both sides**: your microphone and the other people, mixed into one
+  file at half volume each, so it never distorts when both are loud.
+- **Audio: other side only**: just what the computer plays, so the other
+  people.
+
+The choice holds for the next sessions until you change it, and can't be
+changed while a session runs. The file is `audio.ogg` (Opus), about 11 MB an
+hour. While an answer is read aloud, the file gets silence instead, so the
+voice is never saved. Without a microphone, **both sides** saves the other
+side only. Set the starting choice with `mode` under `[recording]` in
+`config.toml`.
+
+When a session stops, the island shows **Saved:** and the session's folder,
+shortened so it fits (for example `~/Downloads/Backstage/2026-11-22_1045_a…`),
+and the Session tab shows a longer version of it, with **Open folder** and **Dismiss**. The small cross next to the pill dismisses it too. A summary with
 decisions and action items is written to the folder a few seconds later.
 
 ## Phone
@@ -181,7 +200,9 @@ record in it are saved to the normal `~/Downloads/Backstage/` folder.
 
 ## Records
 
-Each session is a folder in `~/Downloads/Backstage/`, readable only by you. Change
+Each session is a folder in `~/Downloads/Backstage/`, readable only by you. A
+second session started in the same minute with the same title gets `-2` on the
+end of its folder name, then `-3`. Change
 the place with `folder` under `[sessions]` in `config.toml`.
 
 ```
@@ -190,6 +211,7 @@ the place with `folder` under `[sessions]` in `config.toml`.
     transcript.md     everything said, with times
     answers.md        assistant sessions: every analysis, with its screenshot
     script.txt        teleprompter sessions: the script used
+    audio.ogg         the meeting's audio, if chosen on the Session tab
     summary.md        summary, decisions and action items
     events.jsonl      all of the above as JSON lines, for scripts
     screenshots/      the screenshots that were analysed (JPEG)
@@ -204,5 +226,8 @@ With `encrypt = true` under `[sessions]`, each folder becomes one encrypted
 [encrypted records](privacy-and-security.md#encrypted-records).
 
 In the transcript, "Me" is your microphone and "Them" is whatever the computer
-plays (the other people). Use headphones if you can: through speakers your
-microphone also hears the others, and their words appear twice.
+plays (the other people). Through speakers your microphone also hears the
+others, so during a session Backstage removes what the speakers play from your
+microphone (PipeWire's echo removal). It catches most of it, not all, so
+headphones are still the cleanest. Your system microphone and meeting apps are
+not changed by this.

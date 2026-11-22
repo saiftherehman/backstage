@@ -57,13 +57,32 @@ class Recorder:
             self._process = None
 
 
+def node_id(name):
+    """PipeWire id of the node called name (e.g. "alsa_input.pci-..."), as
+    text, or "" if there is none. wpctl only takes ids, not names."""
+    dump = subprocess.run(["pw-dump"], capture_output=True, text=True).stdout
+    for node in json.loads(dump or "[]"):
+        props = node.get("info", {}).get("props", {}) or {}
+        if node.get("type") == "PipeWire:Interface:Node" and props.get("node.name") == name:
+            return str(node["id"])
+    return ""
+
+
+def _wpctl_source(target):
+    """What to pass to wpctl for the chosen input: its id, the default
+    input when target is empty, or "" if the named one is not there."""
+    return node_id(target) if target else "@DEFAULT_AUDIO_SOURCE@"
+
+
 def microphone_available(target):
     """True if the chosen (or default) input is a real microphone.
 
     When a sound card has no input profile, PipeWire falls back to the
     speaker output as the default source, which would make the other
     people's voices look like the user's."""
-    node = target or "@DEFAULT_AUDIO_SOURCE@"
+    node = _wpctl_source(target)
+    if not node:
+        return False
     result = subprocess.run(["wpctl", "inspect", node], capture_output=True, text=True)
     return 'media.class = "Audio/Source"' in result.stdout
 
@@ -78,7 +97,7 @@ def microphone_live(target, own_pids):
     read aloud when nobody in the meeting can hear them."""
     if not microphone_available(target):
         return False
-    volume = subprocess.run(["wpctl", "get-volume", target or "@DEFAULT_AUDIO_SOURCE@"],
+    volume = subprocess.run(["wpctl", "get-volume", _wpctl_source(target)],
                             capture_output=True, text=True).stdout
     if "MUTED" in volume:
         return False

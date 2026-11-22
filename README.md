@@ -1,5 +1,7 @@
 # Backstage
 
+<img src="extension/backstage@saiftherehman.github.io/icons/backstage-symbolic.svg" alt="Backstage logo" width="64">
+
 A meeting and presentation helper for GNOME on Linux. A small island at the
 top of the screen gives you:
 
@@ -11,9 +13,10 @@ top of the screen gives you:
 - **Phone**: the assistant's output on your phone, as a second screen. When
   you share your entire screen the island hides and the phone takes over; with
   your microphone off, answers are also read aloud.
-- **Records**: every session saved as files: transcript, answers with
-  screenshots, summary and action items. Optionally encrypted with a key in
-  the GNOME keyring.
+- **Records**: every session saved as files in `~/Downloads/Backstage`:
+  transcript, answers with screenshots, summary and action items, and the
+  meeting's audio if you choose. Optionally encrypted with a key in the GNOME
+  keyring.
 
 Speech recognition, the voice and the records run on your computer. Screen
 analysis uses a command line AI tool you are already signed in to (Claude Code;
@@ -66,6 +69,7 @@ Remove it with `./uninstall.sh`. Your records in `~/Downloads/Backstage/` are ke
 | --- | --- |
 | AI tool, model, how often the screen is checked | `[assistant]` in `config.toml` |
 | When answers are read aloud, voice | `[voice]` in `config.toml` |
+| Saving the meeting's audio, its quality | `[recording]` in `config.toml` |
 | Phone page on or off, port | `[phone]` in `config.toml` |
 | Apps never sent to the AI, chat notice, encrypted records | `[privacy]`, `[consent]`, `[sessions]` in `config.toml` |
 | Which programs may call the helper | `ALLOWED_PROGRAMS` in `helper/backstage/service.py` |
@@ -73,6 +77,7 @@ Remove it with `./uninstall.sh`. Your records in `~/Downloads/Backstage/` are ke
 | Answer wording | top of `helper/backstage/assistant.py` |
 | Hotkeys | `extension/backstage@saiftherehman.github.io/schemas/` |
 | Look of the island | `extension/backstage@saiftherehman.github.io/stylesheet.css` |
+| Logo (also the top bar icon) | `extension/backstage@saiftherehman.github.io/icons/backstage-symbolic.svg` |
 | How see-through the island is | `IDLE_OPACITY` in `island.js` and `.backstage` in `stylesheet.css` |
 | Island always on screen, or top bar icon | Extensions app > Backstage > Settings, or `display` in the schema |
 

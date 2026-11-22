@@ -1,6 +1,7 @@
 // Small building blocks shared by the island pages.
 
 import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
 import Pango from 'gi://Pango';
 import St from 'gi://St';
 
@@ -8,6 +9,16 @@ export function button(label, onClick, styleClass = '') {
     const b = new St.Button({label, style_class: `backstage-button ${styleClass}`, can_focus: false});
     b.connect('clicked', onClick);
     return b;
+}
+
+/**
+ * A saved path short enough for the island: the home folder becomes "~" and,
+ * past maxLength characters, the end is cut off with "...".
+ */
+export function shortPath(path, maxLength) {
+    const home = GLib.get_home_dir();
+    const short = path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
+    return short.length > maxLength ? `${short.slice(0, maxLength - 1)}\u2026` : short;
 }
 
 export function wrapLabel(text, styleClass) {

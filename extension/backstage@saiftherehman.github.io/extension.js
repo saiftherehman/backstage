@@ -42,6 +42,7 @@ export default class BackstageIslandExtension extends Extension {
             analyseNow: () => this._call(this._client.analyseNow()),
             setProvider: name => this._call(this._client.setProvider(name)),
             setPaused: paused => this._call(this._client.setPaused(paused)),
+            setRecording: mode => this._call(this._client.setRecording(mode)),
             openRecords: () => this._openRecords(),
             dismissSaved: () => this._dismissSaved(),
         });
@@ -109,7 +110,7 @@ export default class BackstageIslandExtension extends Extension {
             this._userChoice = null;
         if (!previous || previous.script_lines.join('\n') !== state.script_lines.join('\n'))
             island.prompter.setScript(state.script_lines, state.prompter_line);
-        island.setSessionStart(state.active ? state.started : 0);
+        island.setSessionStart(state.active ? state.started : 0, state.recording_audio);
         const saved = state.last_saved ?? '';
         island.setSaved(!state.active && savedKey(saved) !== this._dismissedSaved ? saved : '');
         island.setMessage(state.status || 'Backstage');

@@ -34,6 +34,10 @@ mic = ""
 system = ""
 # Loudness (0 to 1) above which a 100 ms chunk counts as speech.
 speech_level = 0.01
+# Remove what the speakers play from the microphone during a session, so the
+# other people do not end up in your side of the transcript and audio. Not
+# needed with headphones, but harmless.
+echo_cancel = true
 
 [speech]
 # Whisper model for the transcript: tiny.en, base.en, small.en or medium.en.
@@ -54,6 +58,18 @@ line_width = 52
 lookahead_words = 40
 # How closely the spoken words must match the script (0 to 100).
 match_score = 72
+
+[recording]
+# Save the meeting's audio as audio.ogg in the session folder. This is the
+# choice a new session starts with; change it on the island's Session tab.
+#   off    = transcript only
+#   both   = your microphone and the other people, mixed into one file
+#   others = only what the computer plays (the other people)
+# Recording people may need their consent. The island shows REC AUDIO while
+# it runs.
+mode = "off"
+# Opus quality in kilobits per second. 24 is clear speech, about 11 MB an hour.
+bitrate_kbps = 24
 
 [voice]
 # Read answers aloud while the entire screen is shared (the island is hidden then).

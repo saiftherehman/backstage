@@ -2,24 +2,6 @@
 
 Planned features, not built yet.
 
-## Meeting audio recording
-
-Save the meeting's audio as a file in the session folder, next to the
-transcript, as an option on each session:
-
-- **Both sides:** your microphone and the other people, mixed into one file.
-- **Other side only:** just what the computer plays (the other people).
-- **Off:** transcript only, as now (the default).
-
-Notes:
-- The audio is already captured for the transcript (`audio.py`), so recording
-  means also writing it to disk, for example as Opus or MP3 to keep files small.
-- Add a setting in `config.toml` (`[recording] mode = "off" | "both" | "others"`)
-  and a choice on the Session tab before starting.
-- Pause the recording while an answer is read aloud, like the transcript does.
-- Recording people may need their consent; show a clear "recording" mark
-  while it runs.
-
 ## More ways to open Backstage
 
 Done: a top bar icon with a menu (start, stop and save, show island, open

@@ -37,6 +37,7 @@ take one directly.
 | Screenshots and AI analysis | No | Yes |
 | Questions heard out loud | Recorded | Recorded and answered |
 | Saved | transcript, script, summary | transcript, answers, screenshots, summary |
+| Audio file (`recording.py`), if chosen | `audio.ogg` | `audio.ogg` |
 
 ## How a screen analysis happens
 
@@ -95,6 +96,7 @@ Bus name and interface `io.github.saiftherehman.Backstage`, object path
 | `LoadDocument` | `path` | |
 | `JumpPrompter` | `line` | |
 | `SetPaused` | `paused` (true or false) | |
+| `SetRecording` | `mode` (`off`, `both` or `others`) | Fails while a session runs |
 
 | Signal | Arguments | When |
 | --- | --- | --- |
@@ -109,7 +111,8 @@ Bus name and interface `io.github.saiftherehman.Backstage`, object path
 State JSON fields: `active`, `kind`, `title`, `started` (Unix time), `folder`,
 `records`, `live_frame`, `watch_interval`, `providers` (list of `name`,
 `label`), `provider`, `script_lines`, `prompter_line`, `share_mode`, `mic_ok`,
-`paused`, `private_windows`, `chat_notice`, `phone_url`, `phone_qr`,
+`paused`, `recording` (audio mode for the next or current session),
+`recording_audio` (true while an audio file is being written), `private_windows`, `chat_notice`, `phone_url`, `phone_qr`,
 `phone_ca_url`, `phone_fingerprint`, `status`, `last_saved` (folder or
 `.backstage` file of the last session that ended, empty before the first).
 
@@ -165,6 +168,7 @@ helper/backstage/           the helper (run as: python -m backstage)
     service.py              D-Bus interface, caller check
     config.py               reads config.toml
     audio.py                pw-record recorders, microphone checks
+    echo.py                 removes the speakers' sound from the microphone
     transcriber.py          pause detection, Whisper
     prompter.py             script lines, voice following with Vosk
     documents.py            .pptx, .docx, .pdf, .txt, .md to text
@@ -178,6 +182,7 @@ helper/backstage/           the helper (run as: python -m backstage)
     certificates.py         certificates for the phone page
     phone_page.html         phone page
     sessions.py             session folders
+    recording.py            meeting audio, mixed at half volume each, saved as Opus
     vault.py                encrypted records, key in the GNOME keyring
 extension/backstage@saiftherehman.github.io/
     extension.js            wiring: helper, hotkeys, screenshot loop, file picker,
@@ -192,6 +197,7 @@ extension/backstage@saiftherehman.github.io/
     screenshot.js           screenshots inside GNOME Shell
     stylesheet.css          look of the island
     schemas/                hotkeys, island or top bar, saved island position
+    icons/                  the logo, also used as the top bar icon
 systemd/backstage-helper.service   service template
 docs/                       this documentation
 models/                     speech and voice models (not in git)

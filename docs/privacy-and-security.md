@@ -126,7 +126,8 @@ load a file as a script or listen in.
 
 ## What stays on the computer
 
-- `~/Downloads/Backstage/` (or the `folder` set under `[sessions]`): transcripts, answers, screenshots, summaries
+- `~/Downloads/Backstage/` (or the `folder` set under `[sessions]`): transcripts, answers, screenshots, summaries, and the meeting's audio when
+  you choose to save it
 - `~/.local/state/backstage/`: the current QR code, certificates, the latest
   screenshot
 
@@ -170,8 +171,9 @@ you need their consent. Check the rules that apply to you before recording.
 
 To make it clear:
 
-- The island shows a red dot and **REC** while a session records (also on the
-  phone page).
+- The island shows a red dot and **REC** while a session records, and **REC
+  AUDIO** while the meeting's audio is also saved (the same on the phone
+  page). Saving the audio is off unless you choose it on the Session tab.
 - Set `[consent] chat_notice` in `config.toml` to a short message. It is
   copied to the clipboard when a session starts, ready to paste into the
   meeting chat.

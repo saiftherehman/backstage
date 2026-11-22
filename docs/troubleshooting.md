@@ -115,7 +115,10 @@ read aloud during a full share, set `speak_answers = "always"`.
 
 ## The other people's words appear twice
 
-Your microphone hears the speakers. Use headphones.
+Your microphone hears the speakers. Backstage removes most of that during a
+session (`echo_cancel` under `[audio]`), but loud speakers can still get
+through. Check that `echo_cancel = true`, turn the speakers down, or use
+headphones. If echo removal fails to start, the island says so.
 
 ## Super+A opens the app grid
 
